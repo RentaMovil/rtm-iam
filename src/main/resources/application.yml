@@ -1,0 +1,26 @@
+# Local values come from .env (git-ignored, see .env.example). In other environments the same
+# names are real environment variables.
+spring:
+  application:
+    name: iam
+  config:
+    import: optional:file:.env[.properties]
+
+  datasource:
+    # Always the iam_app user created by rtm-iam-db (03_dcl), never sa
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+
+  jpa:
+    # The schema is owned by rtm-iam-db (Liquibase). Hibernate only checks that the entities match
+    # the existing tables and fails at startup if they don't; it never creates or alters anything.
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        default_schema: iam
+
+server:
+  port: ${APP_IAM_PORT:3001}
