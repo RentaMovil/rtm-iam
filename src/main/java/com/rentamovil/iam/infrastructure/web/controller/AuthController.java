@@ -4,19 +4,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rentamovil.iam.domain.entity.AuthTokens;
+import com.rentamovil.iam.domain.entity.AuthenticatedUser;
 import com.rentamovil.iam.domain.entity.Person;
 import com.rentamovil.iam.domain.entity.User;
-import com.rentamovil.iam.domain.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.port.in.LoginUseCase;
 import com.rentamovil.iam.domain.port.in.LogoutUseCase;
 import com.rentamovil.iam.domain.port.in.RefreshTokenUseCase;
 import com.rentamovil.iam.domain.port.in.RegisterUserUseCase;
-import com.rentamovil.iam.domain.port.out.TokenProviderPort;
+import com.rentamovil.iam.infrastructure.web.auth.CurrentUser;
 import com.rentamovil.iam.infrastructure.web.dto.AuthResponse;
 import com.rentamovil.iam.infrastructure.web.dto.LoginRequest;
 import com.rentamovil.iam.infrastructure.web.dto.LogoutRequest;
@@ -35,7 +34,6 @@ public class AuthController {
     private final LoginUseCase loginUseCase;
     private final RefreshTokenUseCase refreshTokenUseCase;
     private final LogoutUseCase logoutUseCase;
-    private final TokenProviderPort tokenProviderPort;
 
     // HU-IAM-001: registro público, siempre crea un CLIENT.
     // Al registrarse queda con la sesión iniciada: se crea la cuenta y enseguida se hace el login,
@@ -80,18 +78,13 @@ public class AuthController {
         return AuthResponse.from(tokens);
     }
 
-    // Requiere el access token en "Authorization: Bearer ..." para saber quién cierra sesión
+    // Requiere el access token (Authorization: Bearer ...) para saber quién cierra sesión
     @PostMapping("/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void logout(@RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String authorization,
+    public void logout(@CurrentUser AuthenticatedUser currentUser,
                        @RequestBody(required = false) LogoutRequest request) {
-        if (authorization == null || !authorization.startsWith("Bearer ")) {
-            throw new InvalidTokenException("Falta el token de acceso");
-        }
-        Integer userId = tokenProviderPort.getUserIdFromAccessToken(authorization.substring("Bearer ".length()));
-
         LogoutRequest body = request != null ? request : new LogoutRequest();
-        logoutUseCase.logout(userId, body.getRefreshToken(), body.isAllDevices());
+        logoutUseCase.logout(currentUser.getUserId(), body.getRefreshToken(), body.isAllDevices());
     }
 
     // La columna session.user_agent es VARCHAR(255)

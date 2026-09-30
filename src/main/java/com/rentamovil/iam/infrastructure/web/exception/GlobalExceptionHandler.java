@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import com.rentamovil.iam.domain.exception.AccountBlockedException;
 import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
 import com.rentamovil.iam.domain.exception.InvalidTokenException;
+import com.rentamovil.iam.domain.exception.IncorrectPasswordException;
 import com.rentamovil.iam.domain.exception.ResourceAlreadyExistsException;
+import com.rentamovil.iam.domain.exception.ResourceNotFoundException;
 import com.rentamovil.iam.infrastructure.web.dto.ErrorResponse;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,6 +50,18 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleInvalidCredentials(InvalidCredentialsException e) {
         return new ErrorResponse("INVALID_CREDENTIALS", e.getMessage());
+    }
+
+    @ExceptionHandler(IncorrectPasswordException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleIncorrectPassword(IncorrectPasswordException e) {
+        return new ErrorResponse("INCORRECT_PASSWORD", e.getMessage());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFound(ResourceNotFoundException e) {
+        return new ErrorResponse("NOT_FOUND", e.getMessage());
     }
 
     @ExceptionHandler(InvalidTokenException.class)

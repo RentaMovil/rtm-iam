@@ -23,6 +23,7 @@ import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
+import com.rentamovil.iam.domain.entity.AuthenticatedUser;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.port.out.TokenProviderPort;
@@ -72,7 +73,7 @@ public class JwtTokenProviderAdapter implements TokenProviderPort {
     }
 
     @Override
-    public Integer getUserIdFromAccessToken(String accessToken) {
+    public AuthenticatedUser validateAccessToken(String accessToken) {
         try {
             SignedJWT jwt = SignedJWT.parse(accessToken);
 
@@ -87,7 +88,11 @@ public class JwtTokenProviderAdapter implements TokenProviderPort {
                 throw new InvalidTokenException("Token vencido");
             }
 
-            return Integer.valueOf(jwt.getJWTClaimsSet().getSubject());
+            JWTClaimsSet claims = jwt.getJWTClaimsSet();
+            return new AuthenticatedUser(
+                    Integer.valueOf(claims.getSubject()),
+                    claims.getStringClaim("role"),
+                    claims.getStringListClaim("permissions"));
         } catch (ParseException | JOSEException | NumberFormatException e) {
             throw new InvalidTokenException("Token inválido");
         }
