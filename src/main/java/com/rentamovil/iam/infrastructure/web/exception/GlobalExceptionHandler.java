@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.rentamovil.iam.domain.exception.AccountBlockedException;
 import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
+import com.rentamovil.iam.domain.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.exception.ResourceAlreadyExistsException;
 import com.rentamovil.iam.infrastructure.web.dto.ErrorResponse;
 
@@ -47,6 +48,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleInvalidCredentials(InvalidCredentialsException e) {
         return new ErrorResponse("INVALID_CREDENTIALS", e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidTokenException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleInvalidToken(InvalidTokenException e) {
+        return new ErrorResponse("INVALID_TOKEN", e.getMessage());
     }
 
     @ExceptionHandler(AccountBlockedException.class)

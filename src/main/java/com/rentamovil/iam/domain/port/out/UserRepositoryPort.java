@@ -10,6 +10,8 @@ public interface UserRepositoryPort {
 
     User save(User user);
 
+    Optional<User> findById(Integer id);
+
     boolean existsByUsername(String username);
 
     Optional<User> findByUsername(String username);

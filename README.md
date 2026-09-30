@@ -77,6 +77,12 @@ curl http://localhost:3001/health
 | GET | `/jwks` | — | — | 200 (clave pública) |
 | POST | `/register` | — | HU-IAM-001 | 201 (tokens, queda logueado) · 400 `VALIDATION_ERROR` · 409 `EMAIL_ALREADY_EXISTS` / `USERNAME_ALREADY_EXISTS` |
 | POST | `/login` | — | HU-IAM-002 | 200 (tokens) · 401 `INVALID_CREDENTIALS` · 423 `ACCOUNT_BLOCKED` |
+| POST | `/refresh` | — | — | 200 (tokens nuevos) · 401 `INVALID_TOKEN` |
+| POST | `/logout` | Bearer | — | 204 · 401 `INVALID_TOKEN` |
+
+Refresh: cada refresh token sirve **una sola vez** (rotación). Si llega uno ya usado, se revocan
+todas las sesiones del usuario (posible robo). Logout: `{"refreshToken": "...", "allDevices": false}`;
+el access token no se puede anular, vence solo a los 30 min.
 
 Login: `{"identifier": "<email o username>", "password": "..."}`. Al 5.º intento fallido seguido
 la cuenta queda `BLOCKED` y solo un `SUPER_ADMIN` la desbloquea. El contador de intentos está en
