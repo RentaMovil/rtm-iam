@@ -2,10 +2,12 @@ package com.rentamovil.iam.infrastructure.persistence.adapter;
 
 import com.rentamovil.iam.domain.entity.Person;
 import com.rentamovil.iam.domain.entity.Role;
+import com.rentamovil.iam.domain.entity.Session;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.enums.UserStatus;
 import com.rentamovil.iam.infrastructure.persistence.entity.PersonEntity;
 import com.rentamovil.iam.infrastructure.persistence.entity.RoleEntity;
+import com.rentamovil.iam.infrastructure.persistence.entity.SessionEntity;
 import com.rentamovil.iam.infrastructure.persistence.entity.UserEntity;
 
 // Convierte entre las entidades del dominio y las entidades JPA (tablas)
@@ -60,6 +62,32 @@ public final class PersistenceMapper {
                 .status(UserStatus.valueOf(entity.getStatus()))
                 .lastLogin(entity.getLastLogin())
                 .build();
+    }
+
+    public static Session toDomain(SessionEntity entity) {
+        return Session.builder()
+                .id(entity.getId())
+                .userId(entity.getUserId())
+                .refreshTokenHash(entity.getRefreshToken())
+                .createdAt(entity.getCreatedAt())
+                .expiresAt(entity.getExpiresAt())
+                .ipAddress(entity.getIpAddress())
+                .userAgent(entity.getUserAgent())
+                .revoked(entity.isRevoked())
+                .build();
+    }
+
+    public static SessionEntity toEntity(Session session) {
+        SessionEntity entity = new SessionEntity();
+        entity.setId(session.getId());
+        entity.setUserId(session.getUserId());
+        entity.setRefreshToken(session.getRefreshTokenHash());
+        entity.setCreatedAt(session.getCreatedAt());
+        entity.setExpiresAt(session.getExpiresAt());
+        entity.setIpAddress(session.getIpAddress());
+        entity.setUserAgent(session.getUserAgent());
+        entity.setRevoked(session.isRevoked());
+        return entity;
     }
 
     public static UserEntity toEntity(User user) {
