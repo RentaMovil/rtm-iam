@@ -1,43 +1,40 @@
 package com.rentamovil.iam.infrastructure.security;
 
-import java.nio.charset.StandardCharsets;
-import java.security.GeneralSecurityException;
-import java.security.Signature;
+import java.security.KeyFactory;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 
-/**
- * Loads the RS256 signing key pair once at startup. The service refuses to start if the keys are
- * missing, malformed, too short, or not a matching pair — better than failing on the first login.
- */
+// Carga el par de claves RS256 del .env al arrancar.
+// La privada firma los tokens; la pública se publica en /jwks para que otros servicios los verifiquen.
 @Configuration
 public class JwtKeyConfig {
 
-    private static final int MIN_KEY_SIZE_BITS = 2048;
-
     @Bean
-    RSAKey jwtSigningKey(
-            @Value("${app.iam.jwt.private-key:}") String privateKeyText,
-            @Value("${app.iam.jwt.public-key:}") String publicKeyText) throws JOSEException {
+    public RSAKey jwtSigningKey(@Value("${app.iam.jwt.private-key}") String privateKeyText,
+                                @Value("${app.iam.jwt.public-key}") String publicKeyText) throws Exception {
 
-        RSAPrivateKey privateKey = RsaKeyParser.parsePrivateKey(privateKeyText);
-        RSAPublicKey publicKey = RsaKeyParser.parsePublicKey(publicKeyText);
-
-        if (publicKey.getModulus().bitLength() < MIN_KEY_SIZE_BITS) {
-            throw new IllegalStateException("JWT RSA key must be at least " + MIN_KEY_SIZE_BITS + " bits");
+        if (privateKeyText.isBlank() || publicKeyText.isBlank()) {
+            throw new IllegalStateException("Faltan APP_IAM_JWT_PRIVATE_KEY / APP_IAM_JWT_PUBLIC_KEY en el .env");
         }
-        if (!isMatchingPair(privateKey, publicKey)) {
-            throw new IllegalStateException(
-                    "APP_IAM_JWT_PRIVATE_KEY and APP_IAM_JWT_PUBLIC_KEY are not a matching key pair");
+
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyFactory.generatePrivate(new PKCS8EncodedKeySpec(decode(privateKeyText)));
+        RSAPublicKey publicKey = (RSAPublicKey) keyFactory.generatePublic(new X509EncodedKeySpec(decode(publicKeyText)));
+
+        //Si las dos claves no son pareja, los tokens firmados no se podrían verificar
+        if (!publicKey.getModulus().equals(privateKey.getModulus())) {
+            throw new IllegalStateException("La clave pública y la privada del .env no son pareja");
         }
 
         RSAKey key = new RSAKey.Builder(publicKey)
@@ -45,25 +42,14 @@ public class JwtKeyConfig {
                 .keyUse(KeyUse.SIGNATURE)
                 .algorithm(JWSAlgorithm.RS256)
                 .build();
-        // kid = RFC 7638 thumbprint: derived from the public key itself, so it changes only when
-        // the key changes (lets verifiers pick the right key during a future key rotation).
+
+        //El kid es la "huella" de la clave: sirve para cambiar de clave en el futuro sin romper nada
         return new RSAKey.Builder(key).keyID(key.computeThumbprint().toString()).build();
     }
 
-    static boolean isMatchingPair(RSAPrivateKey privateKey, RSAPublicKey publicKey) {
-        try {
-            byte[] probe = "rentamovil-key-pair-check".getBytes(StandardCharsets.UTF_8);
-            Signature signer = Signature.getInstance("SHA256withRSA");
-            signer.initSign(privateKey);
-            signer.update(probe);
-            byte[] signature = signer.sign();
-
-            Signature verifier = Signature.getInstance("SHA256withRSA");
-            verifier.initVerify(publicKey);
-            verifier.update(probe);
-            return verifier.verify(signature);
-        } catch (GeneralSecurityException e) {
-            return false;
-        }
+    // Acepta el PEM completo o solo el texto base64 en una línea (así cabe en el .env)
+    private byte[] decode(String keyText) {
+        String base64 = keyText.replaceAll("-----(BEGIN|END) [A-Z ]+-----", "").replaceAll("\\s", "");
+        return Base64.getDecoder().decode(base64);
     }
 }
