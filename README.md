@@ -14,25 +14,32 @@ Documentación del servicio: `rtm-docs/09-microservices/services/02-iam/`.
 
 ```
 src/main/java/com/rentamovil/iam/
-├── domain/            Modelo y puertos. Sin Spring, sin JPA: Java puro
-│   ├── model/
+├── domain/                   Reglas del negocio. No usa Spring ni JPA
+│   ├── entity/                 Person, User, Role
+│   ├── enums/                  UserStatus
+│   ├── exception/              ResourceAlreadyExistsException, ...
 │   └── port/
-│       ├── in/          casos de uso (interfaces)
-│       └── out/         lo que el dominio necesita de afuera (repositorios, etc.)
-├── application/       Implementación de los casos de uso
-│   └── usecase/
-└── infrastructure/    Adaptadores: todo lo que depende de un framework
-    ├── web/             controllers REST
-    ├── persistence/     entidades JPA y repositorios
-    └── config/          wiring de Spring
+│       ├── in/                 casos de uso (RegisterUserUseCase, ...)
+│       └── out/                lo que el dominio necesita (UserRepositoryPort, PasswordHasherPort, ...)
+├── application/usecase/      Implementación de los casos de uso (RegisterUserUseCaseImpl, ...)
+└── infrastructure/           Adaptadores
+    ├── config/                 BeanConfig: conecta casos de uso con adaptadores
+    ├── persistence/
+    │   ├── entity/             entidades JPA (tablas del schema iam)
+    │   ├── repository/         Spring Data
+    │   └── adapter/            implementan los *RepositoryPort
+    ├── security/               BCrypt y claves JWT
+    └── web/
+        ├── controller/         AuthController, JwksController, HealthController
+        ├── dto/                requests y responses
+        └── exception/          GlobalExceptionHandler
 ```
 
-Regla: `domain` no importa nada de `org.springframework.*` ni `jakarta.persistence.*`. Ver
-`rtm-docs/05-architecture/hexagonal-architecture.md` y `rtm-docs/_stacks/java-spring.md`.
+Ver `rtm-docs/05-architecture/hexagonal-architecture.md`.
 
 ## El servicio no toca el esquema
 
-`spring.jpa.hibernate.ddl-auto: validate` — Hibernate solo **verifica** al arrancar que las
+`spring.jpa.hibernate.ddl-auto=validate` — Hibernate solo **verifica** al arrancar que las
 entidades coincidan con las tablas creadas por `rtm-iam-db`, y falla si no coinciden. Nunca crea
 ni modifica tablas. Un cambio de esquema = un changeset en `rtm-iam-db`, primero.
 
@@ -61,6 +68,19 @@ curl http://localhost:3001/health
 ```
 
 `/health` responde `503` con `"db":"disconnected"` si la base deja de responder.
+
+## Endpoints
+
+| Método | Ruta | Auth | Historia | Respuestas |
+|---|---|---|---|---|
+| GET | `/health` | — | — | 200 / 503 |
+| GET | `/jwks` | — | — | 200 (clave pública) |
+| POST | `/register` | — | HU-IAM-001 | 201 · 400 `VALIDATION_ERROR` · 409 `EMAIL_ALREADY_EXISTS` / `USERNAME_ALREADY_EXISTS` |
+
+```bash
+curl -X POST http://localhost:3001/register -H "Content-Type: application/json" \
+  -d '{"firstName":"María","lastName":"García","email":"maria@example.com","username":"mgarcia","password":"SecurePass123!"}'
+```
 
 ## Claves JWT (RS256)
 
