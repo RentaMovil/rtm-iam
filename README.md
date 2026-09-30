@@ -78,6 +78,8 @@ curl http://localhost:3001/health
 | POST | `/register` | — | HU-IAM-001 | 201 (tokens, queda logueado) · 400 `VALIDATION_ERROR` · 409 `EMAIL_ALREADY_EXISTS` / `USERNAME_ALREADY_EXISTS` |
 | POST | `/login` | — | HU-IAM-002 | 200 (tokens) · 401 `INVALID_CREDENTIALS` · 423 `ACCOUNT_BLOCKED` |
 | POST | `/refresh` | — | — | 200 (tokens nuevos) · 401 `INVALID_TOKEN` |
+| POST | `/password/forgot` | — | HU-IAM-003 | 202 siempre (exista o no el email) |
+| POST | `/password/reset` | — | HU-IAM-003 | 204 · 400 `INVALID_CODE` / `CODE_EXPIRED` |
 | POST | `/logout` | Bearer | — | 204 · 401 `INVALID_TOKEN` |
 | GET | `/users/me` | Bearer | HU-IAM-004 | 200 (perfil) · 401 |
 | PATCH | `/users/me` | Bearer | HU-IAM-004 | 200 · 400 — cambia `firstName`, `lastName`, `phone` (lo que no venga no se toca) |
@@ -89,6 +91,11 @@ curl http://localhost:3001/health
 
 Estados: solo `BLOCKED → ACTIVE` (desbloquear) y `ACTIVE → INACTIVE` (desactivar). Cambios de rol y
 de estado quedan en `shared.audit` (`ROLE_GRANTED`, `USER_UNBLOCKED`, `USER_DEACTIVATED`).
+
+Recuperar contraseña: el código (6 dígitos, 15 min) **no se envía por email todavía**: el
+adaptador `LogEmailSenderAdapter` lo escribe en el log del servicio (busca `[EMAIL DE DESARROLLO]`).
+Cuando haya SMTP se reemplaza solo ese adaptador. Al cambiar la contraseña se cierran todas las
+sesiones del usuario.
 
 Los endpoints con Bearer reciben al usuario con `@CurrentUser AuthenticatedUser` (ver
 `infrastructure/web/auth`): el id sale del token, nunca de la URL.
