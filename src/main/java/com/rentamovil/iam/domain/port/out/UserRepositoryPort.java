@@ -1,5 +1,6 @@
 package com.rentamovil.iam.domain.port.out;
 
+import java.util.List;
 import java.util.Optional;
 
 import com.rentamovil.iam.domain.entity.User;
@@ -17,4 +18,7 @@ public interface UserRepositoryPort {
     Optional<User> findByUsername(String username);
 
     Optional<User> findByEmail(String email);
+
+    // Busca por nombre, apellido, email o username. Si search viene vacío devuelve todos.
+    List<User> search(String search);
 }

@@ -83,6 +83,13 @@ curl http://localhost:3001/health
 | PATCH | `/users/me` | Bearer | HU-IAM-004 | 200 · 400 — cambia `firstName`, `lastName`, `phone` (lo que no venga no se toca) |
 | PATCH | `/users/me/email` | Bearer | HU-IAM-004 | 200 · 401 `INCORRECT_PASSWORD` · 409 `EMAIL_ALREADY_EXISTS` |
 
+| GET | `/users?search=` | Bearer + `users:read` | HU-IAM-005 | 200 · 403 `FORBIDDEN` |
+| PATCH | `/users/{id}/role` | Bearer + `roles:grant` | HU-IAM-005 | 200 · 403 · 404 · 409 `CANNOT_CHANGE_OWN_ROLE` |
+| PATCH | `/users/{id}/status` | Bearer + `users:update-status` | HU-IAM-005 | 200 · 400 · 403 · 404 · 409 `INVALID_STATUS_TRANSITION` |
+
+Estados: solo `BLOCKED → ACTIVE` (desbloquear) y `ACTIVE → INACTIVE` (desactivar). Cambios de rol y
+de estado quedan en `shared.audit` (`ROLE_GRANTED`, `USER_UNBLOCKED`, `USER_DEACTIVATED`).
+
 Los endpoints con Bearer reciben al usuario con `@CurrentUser AuthenticatedUser` (ver
 `infrastructure/web/auth`): el id sale del token, nunca de la URL.
 
