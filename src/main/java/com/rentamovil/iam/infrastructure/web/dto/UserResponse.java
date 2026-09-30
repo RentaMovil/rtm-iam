@@ -1,5 +1,8 @@
 package com.rentamovil.iam.infrastructure.web.dto;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.rentamovil.iam.domain.entity.User;
 
 import lombok.Builder;
@@ -8,6 +11,7 @@ import lombok.Getter;
 // UserSummary de iam.yaml. Nunca incluye el hash de la contraseña.
 @Getter
 @Builder
+@JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class UserResponse {
 
     private Integer id;
@@ -17,6 +21,7 @@ public class UserResponse {
     private String lastName;
     private String role;
     private String status;
+    private List<String> permissions;
 
     public static UserResponse from(User user) {
         return UserResponse.builder()
@@ -27,6 +32,7 @@ public class UserResponse {
                 .lastName(user.getPerson().getLastName())
                 .role(user.getRole().getName())
                 .status(user.getStatus().name())
+                .permissions(user.getRole().getPermissions())
                 .build();
     }
 }

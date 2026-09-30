@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.rentamovil.iam.domain.exception.AccountBlockedException;
+import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
 import com.rentamovil.iam.domain.exception.ResourceAlreadyExistsException;
 import com.rentamovil.iam.infrastructure.web.dto.ErrorResponse;
 
@@ -39,6 +41,18 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleAlreadyExists(ResourceAlreadyExistsException e) {
         return new ErrorResponse(e.getCode(), e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorResponse handleInvalidCredentials(InvalidCredentialsException e) {
+        return new ErrorResponse("INVALID_CREDENTIALS", e.getMessage());
+    }
+
+    @ExceptionHandler(AccountBlockedException.class)
+    @ResponseStatus(HttpStatus.LOCKED)
+    public ErrorResponse handleAccountBlocked(AccountBlockedException e) {
+        return new ErrorResponse("ACCOUNT_BLOCKED", e.getMessage());
     }
 
     // Dos registros iguales al mismo tiempo: los dos pasan el "existe?" pero la base frena al segundo
