@@ -8,6 +8,10 @@ public interface TokenProviderPort {
     // JWT firmado con sub, email, role y permissions
     String generateAccessToken(User user);
 
+    // Verifica firma y vencimiento del access token y devuelve el id del usuario (claim sub).
+    // Lanza InvalidTokenException si no es válido.
+    Integer getUserIdFromAccessToken(String accessToken);
+
     // Segundos de vida del access token (1800 = 30 min)
     long getAccessTokenExpiresIn();
 

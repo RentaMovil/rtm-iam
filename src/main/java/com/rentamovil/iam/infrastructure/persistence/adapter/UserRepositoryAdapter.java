@@ -22,6 +22,11 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     }
 
     @Override
+    public Optional<User> findById(Integer id) {
+        return userJpaRepository.findById(id).map(PersistenceMapper::toDomain);
+    }
+
+    @Override
     public boolean existsByUsername(String username) {
         return userJpaRepository.existsByUsername(username);
     }
