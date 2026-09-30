@@ -9,6 +9,12 @@ import com.rentamovil.iam.application.usecase.ChangeMyEmailUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ChangeUserRoleUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ChangeUserStatusUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ListUsersUseCaseImpl;
+import com.rentamovil.iam.application.usecase.RequestPasswordRecoveryUseCaseImpl;
+import com.rentamovil.iam.application.usecase.ResetPasswordUseCaseImpl;
+import com.rentamovil.iam.domain.port.in.RequestPasswordRecoveryUseCase;
+import com.rentamovil.iam.domain.port.in.ResetPasswordUseCase;
+import com.rentamovil.iam.domain.port.out.EmailSenderPort;
+import com.rentamovil.iam.domain.port.out.VerificationCodeRepositoryPort;
 import com.rentamovil.iam.domain.port.in.ChangeUserRoleUseCase;
 import com.rentamovil.iam.domain.port.in.ChangeUserStatusUseCase;
 import com.rentamovil.iam.domain.port.in.ListUsersUseCase;
@@ -106,6 +112,26 @@ public class BeanConfig {
     public ChangeUserStatusUseCase changeUserStatusUseCase(UserRepositoryPort userRepositoryPort,
                                                            AuditPort auditPort) {
         return new ChangeUserStatusUseCaseImpl(userRepositoryPort, auditPort);
+    }
+
+    @Bean
+    public RequestPasswordRecoveryUseCase requestPasswordRecoveryUseCase(
+            UserRepositoryPort userRepositoryPort,
+            VerificationCodeRepositoryPort verificationCodeRepositoryPort,
+            EmailSenderPort emailSenderPort,
+            @Value("${app.iam.password-reset.code-expiry}") long codeExpirySeconds) {
+        return new RequestPasswordRecoveryUseCaseImpl(userRepositoryPort, verificationCodeRepositoryPort,
+                emailSenderPort, codeExpirySeconds);
+    }
+
+    @Bean
+    public ResetPasswordUseCase resetPasswordUseCase(UserRepositoryPort userRepositoryPort,
+                                                     VerificationCodeRepositoryPort verificationCodeRepositoryPort,
+                                                     PasswordHasherPort passwordHasherPort,
+                                                     SessionRepositoryPort sessionRepositoryPort,
+                                                     AuditPort auditPort) {
+        return new ResetPasswordUseCaseImpl(userRepositoryPort, verificationCodeRepositoryPort, passwordHasherPort,
+                sessionRepositoryPort, auditPort);
     }
 
     @Bean

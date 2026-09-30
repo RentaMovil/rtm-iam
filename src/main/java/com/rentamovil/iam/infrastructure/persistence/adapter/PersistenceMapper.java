@@ -4,11 +4,14 @@ import com.rentamovil.iam.domain.entity.Person;
 import com.rentamovil.iam.domain.entity.Role;
 import com.rentamovil.iam.domain.entity.Session;
 import com.rentamovil.iam.domain.entity.User;
+import com.rentamovil.iam.domain.entity.VerificationCode;
+import com.rentamovil.iam.domain.enums.CodeType;
 import com.rentamovil.iam.domain.enums.UserStatus;
 import com.rentamovil.iam.infrastructure.persistence.entity.PersonEntity;
 import com.rentamovil.iam.infrastructure.persistence.entity.RoleEntity;
 import com.rentamovil.iam.infrastructure.persistence.entity.SessionEntity;
 import com.rentamovil.iam.infrastructure.persistence.entity.UserEntity;
+import com.rentamovil.iam.infrastructure.persistence.entity.VerificationCodeEntity;
 
 // Convierte entre las entidades del dominio y las entidades JPA (tablas)
 public final class PersistenceMapper {
@@ -87,6 +90,30 @@ public final class PersistenceMapper {
         entity.setIpAddress(session.getIpAddress());
         entity.setUserAgent(session.getUserAgent());
         entity.setRevoked(session.isRevoked());
+        return entity;
+    }
+
+    public static VerificationCode toDomain(VerificationCodeEntity entity) {
+        return VerificationCode.builder()
+                .id(entity.getId())
+                .userId(entity.getUserId())
+                .code(entity.getCode())
+                .type(CodeType.valueOf(entity.getType()))
+                .createdAt(entity.getCreatedAt())
+                .expiresAt(entity.getExpiresAt())
+                .used(entity.isUsed())
+                .build();
+    }
+
+    public static VerificationCodeEntity toEntity(VerificationCode verificationCode) {
+        VerificationCodeEntity entity = new VerificationCodeEntity();
+        entity.setId(verificationCode.getId());
+        entity.setUserId(verificationCode.getUserId());
+        entity.setCode(verificationCode.getCode());
+        entity.setType(verificationCode.getType().name());
+        entity.setCreatedAt(verificationCode.getCreatedAt());
+        entity.setExpiresAt(verificationCode.getExpiresAt());
+        entity.setUsed(verificationCode.isUsed());
         return entity;
     }
 
