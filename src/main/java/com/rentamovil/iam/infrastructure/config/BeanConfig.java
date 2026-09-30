@@ -6,6 +6,13 @@ import org.springframework.context.annotation.Configuration;
 
 import com.rentamovil.iam.application.service.AuthTokenService;
 import com.rentamovil.iam.application.usecase.ChangeMyEmailUseCaseImpl;
+import com.rentamovil.iam.application.usecase.ChangeUserRoleUseCaseImpl;
+import com.rentamovil.iam.application.usecase.ChangeUserStatusUseCaseImpl;
+import com.rentamovil.iam.application.usecase.ListUsersUseCaseImpl;
+import com.rentamovil.iam.domain.port.in.ChangeUserRoleUseCase;
+import com.rentamovil.iam.domain.port.in.ChangeUserStatusUseCase;
+import com.rentamovil.iam.domain.port.in.ListUsersUseCase;
+import com.rentamovil.iam.domain.port.out.AuditPort;
 import com.rentamovil.iam.application.usecase.GetMyProfileUseCaseImpl;
 import com.rentamovil.iam.application.usecase.LoginUseCaseImpl;
 import com.rentamovil.iam.application.usecase.UpdateMyProfileUseCaseImpl;
@@ -81,6 +88,24 @@ public class BeanConfig {
                                                      PersonRepositoryPort personRepositoryPort,
                                                      PasswordHasherPort passwordHasherPort) {
         return new ChangeMyEmailUseCaseImpl(userRepositoryPort, personRepositoryPort, passwordHasherPort);
+    }
+
+    @Bean
+    public ListUsersUseCase listUsersUseCase(UserRepositoryPort userRepositoryPort) {
+        return new ListUsersUseCaseImpl(userRepositoryPort);
+    }
+
+    @Bean
+    public ChangeUserRoleUseCase changeUserRoleUseCase(UserRepositoryPort userRepositoryPort,
+                                                       RoleRepositoryPort roleRepositoryPort,
+                                                       AuditPort auditPort) {
+        return new ChangeUserRoleUseCaseImpl(userRepositoryPort, roleRepositoryPort, auditPort);
+    }
+
+    @Bean
+    public ChangeUserStatusUseCase changeUserStatusUseCase(UserRepositoryPort userRepositoryPort,
+                                                           AuditPort auditPort) {
+        return new ChangeUserStatusUseCaseImpl(userRepositoryPort, auditPort);
     }
 
     @Bean
