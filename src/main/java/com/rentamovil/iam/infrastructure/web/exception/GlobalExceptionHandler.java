@@ -15,6 +15,7 @@ import com.rentamovil.iam.domain.exception.BusinessRuleException;
 import com.rentamovil.iam.domain.exception.ForbiddenException;
 import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
 import com.rentamovil.iam.domain.exception.InvalidTokenException;
+import com.rentamovil.iam.domain.exception.InvalidVerificationCodeException;
 import com.rentamovil.iam.domain.exception.IncorrectPasswordException;
 import com.rentamovil.iam.domain.exception.ResourceAlreadyExistsException;
 import com.rentamovil.iam.domain.exception.ResourceNotFoundException;
@@ -52,6 +53,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleInvalidCredentials(InvalidCredentialsException e) {
         return new ErrorResponse("INVALID_CREDENTIALS", e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidVerificationCodeException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidCode(InvalidVerificationCodeException e) {
+        return new ErrorResponse(e.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(ForbiddenException.class)
