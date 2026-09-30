@@ -75,7 +75,13 @@ curl http://localhost:3001/health
 |---|---|---|---|---|
 | GET | `/health` | — | — | 200 / 503 |
 | GET | `/jwks` | — | — | 200 (clave pública) |
-| POST | `/register` | — | HU-IAM-001 | 201 · 400 `VALIDATION_ERROR` · 409 `EMAIL_ALREADY_EXISTS` / `USERNAME_ALREADY_EXISTS` |
+| POST | `/register` | — | HU-IAM-001 | 201 (tokens, queda logueado) · 400 `VALIDATION_ERROR` · 409 `EMAIL_ALREADY_EXISTS` / `USERNAME_ALREADY_EXISTS` |
+| POST | `/login` | — | HU-IAM-002 | 200 (tokens) · 401 `INVALID_CREDENTIALS` · 423 `ACCOUNT_BLOCKED` |
+
+Login: `{"identifier": "<email o username>", "password": "..."}`. Al 5.º intento fallido seguido
+la cuenta queda `BLOCKED` y solo un `SUPER_ADMIN` la desbloquea. El contador de intentos está en
+memoria (se reinicia con el servicio); la doc lo pone en Redis, se cambia solo el adaptador
+`InMemoryLoginAttemptAdapter`.
 
 ```bash
 curl -X POST http://localhost:3001/register -H "Content-Type: application/json" \

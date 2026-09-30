@@ -1,13 +1,20 @@
 package com.rentamovil.iam.infrastructure.config;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.rentamovil.iam.application.usecase.LoginUseCaseImpl;
 import com.rentamovil.iam.application.usecase.RegisterUserUseCaseImpl;
+import com.rentamovil.iam.domain.port.in.LoginUseCase;
 import com.rentamovil.iam.domain.port.in.RegisterUserUseCase;
+import com.rentamovil.iam.domain.port.out.LoginAttemptPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
+import com.rentamovil.iam.domain.port.out.PermissionRepositoryPort;
 import com.rentamovil.iam.domain.port.out.PersonRepositoryPort;
 import com.rentamovil.iam.domain.port.out.RoleRepositoryPort;
+import com.rentamovil.iam.domain.port.out.SessionRepositoryPort;
+import com.rentamovil.iam.domain.port.out.TokenProviderPort;
 import com.rentamovil.iam.domain.port.out.UserRepositoryPort;
 
 // Aquí se conectan los casos de uso con sus adaptadores.
@@ -21,5 +28,17 @@ public class BeanConfig {
                                                    RoleRepositoryPort roleRepositoryPort,
                                                    PasswordHasherPort passwordHasherPort) {
         return new RegisterUserUseCaseImpl(personRepositoryPort, userRepositoryPort, roleRepositoryPort, passwordHasherPort);
+    }
+
+    @Bean
+    public LoginUseCase loginUseCase(UserRepositoryPort userRepositoryPort,
+                                     PermissionRepositoryPort permissionRepositoryPort,
+                                     SessionRepositoryPort sessionRepositoryPort,
+                                     PasswordHasherPort passwordHasherPort,
+                                     TokenProviderPort tokenProviderPort,
+                                     LoginAttemptPort loginAttemptPort,
+                                     @Value("${app.iam.refresh-token-expiry}") long refreshTokenExpirySeconds) {
+        return new LoginUseCaseImpl(userRepositoryPort, permissionRepositoryPort, sessionRepositoryPort,
+                passwordHasherPort, tokenProviderPort, loginAttemptPort, refreshTokenExpirySeconds);
     }
 }
