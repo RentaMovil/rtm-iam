@@ -4,9 +4,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.rentamovil.iam.application.service.AuthTokenService;
 import com.rentamovil.iam.application.usecase.LoginUseCaseImpl;
+import com.rentamovil.iam.application.usecase.LogoutUseCaseImpl;
+import com.rentamovil.iam.application.usecase.RefreshTokenUseCaseImpl;
 import com.rentamovil.iam.application.usecase.RegisterUserUseCaseImpl;
 import com.rentamovil.iam.domain.port.in.LoginUseCase;
+import com.rentamovil.iam.domain.port.in.LogoutUseCase;
+import com.rentamovil.iam.domain.port.in.RefreshTokenUseCase;
 import com.rentamovil.iam.domain.port.in.RegisterUserUseCase;
 import com.rentamovil.iam.domain.port.out.LoginAttemptPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
@@ -23,6 +28,14 @@ import com.rentamovil.iam.domain.port.out.UserRepositoryPort;
 public class BeanConfig {
 
     @Bean
+    public AuthTokenService authTokenService(PermissionRepositoryPort permissionRepositoryPort,
+                                             SessionRepositoryPort sessionRepositoryPort,
+                                             TokenProviderPort tokenProviderPort,
+                                             @Value("${app.iam.refresh-token-expiry}") long refreshTokenExpirySeconds) {
+        return new AuthTokenService(permissionRepositoryPort, sessionRepositoryPort, tokenProviderPort, refreshTokenExpirySeconds);
+    }
+
+    @Bean
     public RegisterUserUseCase registerUserUseCase(PersonRepositoryPort personRepositoryPort,
                                                    UserRepositoryPort userRepositoryPort,
                                                    RoleRepositoryPort roleRepositoryPort,
@@ -32,13 +45,23 @@ public class BeanConfig {
 
     @Bean
     public LoginUseCase loginUseCase(UserRepositoryPort userRepositoryPort,
-                                     PermissionRepositoryPort permissionRepositoryPort,
-                                     SessionRepositoryPort sessionRepositoryPort,
                                      PasswordHasherPort passwordHasherPort,
-                                     TokenProviderPort tokenProviderPort,
                                      LoginAttemptPort loginAttemptPort,
-                                     @Value("${app.iam.refresh-token-expiry}") long refreshTokenExpirySeconds) {
-        return new LoginUseCaseImpl(userRepositoryPort, permissionRepositoryPort, sessionRepositoryPort,
-                passwordHasherPort, tokenProviderPort, loginAttemptPort, refreshTokenExpirySeconds);
+                                     AuthTokenService authTokenService) {
+        return new LoginUseCaseImpl(userRepositoryPort, passwordHasherPort, loginAttemptPort, authTokenService);
+    }
+
+    @Bean
+    public RefreshTokenUseCase refreshTokenUseCase(SessionRepositoryPort sessionRepositoryPort,
+                                                   UserRepositoryPort userRepositoryPort,
+                                                   TokenProviderPort tokenProviderPort,
+                                                   AuthTokenService authTokenService) {
+        return new RefreshTokenUseCaseImpl(sessionRepositoryPort, userRepositoryPort, tokenProviderPort, authTokenService);
+    }
+
+    @Bean
+    public LogoutUseCase logoutUseCase(SessionRepositoryPort sessionRepositoryPort,
+                                       TokenProviderPort tokenProviderPort) {
+        return new LogoutUseCaseImpl(sessionRepositoryPort, tokenProviderPort);
     }
 }

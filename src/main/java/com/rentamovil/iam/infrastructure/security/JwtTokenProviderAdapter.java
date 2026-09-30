@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.ParseException;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Date;
@@ -18,10 +19,12 @@ import com.nimbusds.jose.JOSEObjectType;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.RSASSASigner;
+import com.nimbusds.jose.crypto.RSASSAVerifier;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.rentamovil.iam.domain.entity.User;
+import com.rentamovil.iam.domain.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.port.out.TokenProviderPort;
 
 // Crea los tokens. Claims definidos en 07-api/authentication.md: sub, email, role, permissions.
@@ -65,6 +68,28 @@ public class JwtTokenProviderAdapter implements TokenProviderPort {
             return jwt.serialize();
         } catch (JOSEException e) {
             throw new IllegalStateException("No se pudo firmar el token", e);
+        }
+    }
+
+    @Override
+    public Integer getUserIdFromAccessToken(String accessToken) {
+        try {
+            SignedJWT jwt = SignedJWT.parse(accessToken);
+
+            //Solo se aceptan tokens RS256 firmados con nuestra clave
+            if (!JWSAlgorithm.RS256.equals(jwt.getHeader().getAlgorithm())
+                    || !jwt.verify(new RSASSAVerifier(jwtSigningKey.toRSAPublicKey()))) {
+                throw new InvalidTokenException("Token inválido");
+            }
+
+            Date expiration = jwt.getJWTClaimsSet().getExpirationTime();
+            if (expiration == null || expiration.before(new Date())) {
+                throw new InvalidTokenException("Token vencido");
+            }
+
+            return Integer.valueOf(jwt.getJWTClaimsSet().getSubject());
+        } catch (ParseException | JOSEException | NumberFormatException e) {
+            throw new InvalidTokenException("Token inválido");
         }
     }
 

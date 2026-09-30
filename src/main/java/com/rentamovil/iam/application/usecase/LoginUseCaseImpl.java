@@ -3,8 +3,8 @@ package com.rentamovil.iam.application.usecase;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import com.rentamovil.iam.application.service.AuthTokenService;
 import com.rentamovil.iam.domain.entity.AuthTokens;
-import com.rentamovil.iam.domain.entity.Session;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.enums.UserStatus;
 import com.rentamovil.iam.domain.exception.AccountBlockedException;
@@ -12,9 +12,6 @@ import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
 import com.rentamovil.iam.domain.port.in.LoginUseCase;
 import com.rentamovil.iam.domain.port.out.LoginAttemptPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
-import com.rentamovil.iam.domain.port.out.PermissionRepositoryPort;
-import com.rentamovil.iam.domain.port.out.SessionRepositoryPort;
-import com.rentamovil.iam.domain.port.out.TokenProviderPort;
 import com.rentamovil.iam.domain.port.out.UserRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
@@ -27,12 +24,9 @@ public class LoginUseCaseImpl implements LoginUseCase {
     public static final int MAX_FAILED_ATTEMPTS = 5;
 
     private final UserRepositoryPort userRepositoryPort;
-    private final PermissionRepositoryPort permissionRepositoryPort;
-    private final SessionRepositoryPort sessionRepositoryPort;
     private final PasswordHasherPort passwordHasherPort;
-    private final TokenProviderPort tokenProviderPort;
     private final LoginAttemptPort loginAttemptPort;
-    private final long refreshTokenExpirySeconds;
+    private final AuthTokenService authTokenService;
 
     @Override
     public AuthTokens login(String identifier, String rawPassword, String ipAddress, String userAgent) {
@@ -60,19 +54,7 @@ public class LoginUseCaseImpl implements LoginUseCase {
         user.setLastLogin(LocalDateTime.now());
         userRepositoryPort.save(user);
 
-        //Los permisos del rol van dentro del JWT
-        user.getRole().setPermissions(permissionRepositoryPort.findNamesByRoleId(user.getRole().getId()));
-
-        String accessToken = tokenProviderPort.generateAccessToken(user);
-        String refreshToken = tokenProviderPort.generateRefreshToken();
-        saveSession(user, refreshToken, ipAddress, userAgent);
-
-        return AuthTokens.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .expiresIn(tokenProviderPort.getAccessTokenExpiresIn())
-                .user(user)
-                .build();
+        return authTokenService.issue(user, ipAddress, userAgent);
     }
 
     private Optional<User> findByEmailOrUsername(String identifier) {
@@ -90,19 +72,5 @@ public class LoginUseCaseImpl implements LoginUseCase {
             userRepositoryPort.save(user);
             loginAttemptPort.reset(user.getId());
         }
-    }
-
-    private void saveSession(User user, String refreshToken, String ipAddress, String userAgent) {
-        LocalDateTime now = LocalDateTime.now();
-        Session session = Session.builder()
-                .userId(user.getId())
-                .refreshTokenHash(tokenProviderPort.hashRefreshToken(refreshToken))
-                .createdAt(now)
-                .expiresAt(now.plusSeconds(refreshTokenExpirySeconds))
-                .ipAddress(ipAddress)
-                .userAgent(userAgent)
-                .revoked(false)
-                .build();
-        sessionRepositoryPort.save(session);
     }
 }
