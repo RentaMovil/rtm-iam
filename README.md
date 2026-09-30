@@ -62,6 +62,33 @@ curl http://localhost:3001/health
 
 `/health` responde `503` con `"db":"disconnected"` si la base deja de responder.
 
+## Claves JWT (RS256)
+
+`iam` firma los tokens con una **clave privada** que solo él tiene, y publica la **clave
+pública** en `GET /jwks` para que el gateway y los demás servicios los verifiquen
+(`rtm-docs/07-api/authentication.md`).
+
+Generar un par para tu entorno local (Git Bash; OpenSSL viene con Git):
+
+```bash
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out priv.pem
+openssl pkey -in priv.pem -pubout -out pub.pem
+
+# Copia a .env el contenido SIN las líneas -----BEGIN/END----- y en una sola línea:
+sed '/-----/d' priv.pem | tr -d '\r\n'   # → APP_IAM_JWT_PRIVATE_KEY=
+sed '/-----/d' pub.pem  | tr -d '\r\n'   # → APP_IAM_JWT_PUBLIC_KEY=
+
+rm priv.pem pub.pem                      # no dejes las claves sueltas en el disco
+```
+
+El servicio **no arranca** si las claves faltan, no son válidas, miden menos de 2048 bits o no
+son un par. Cada entorno tiene su propio par: nunca se reutilizan ni se suben al repo.
+
+```bash
+curl http://localhost:3001/jwks
+# {"keys":[{"kty":"RSA","e":"AQAB","use":"sig","kid":"…","alg":"RS256","n":"…"}]}
+```
+
 ## Ramas
 
 `feat/`, `fix/`, `chore/` → PR a `develop` (Squash and Merge). Ver

@@ -24,3 +24,10 @@ spring:
 
 server:
   port: ${APP_IAM_PORT:3001}
+
+app:
+  iam:
+    jwt:
+      # RS256 key pair (PEM or its one-line Base64 body). Never committed: local .env / env vars.
+      private-key: ${APP_IAM_JWT_PRIVATE_KEY:}
+      public-key: ${APP_IAM_JWT_PUBLIC_KEY:}
