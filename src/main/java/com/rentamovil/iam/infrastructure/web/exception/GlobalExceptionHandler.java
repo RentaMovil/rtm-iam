@@ -11,6 +11,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.rentamovil.iam.domain.exception.AccountBlockedException;
+import com.rentamovil.iam.domain.exception.BusinessRuleException;
+import com.rentamovil.iam.domain.exception.ForbiddenException;
 import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
 import com.rentamovil.iam.domain.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.exception.IncorrectPasswordException;
@@ -50,6 +52,18 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
     public ErrorResponse handleInvalidCredentials(InvalidCredentialsException e) {
         return new ErrorResponse("INVALID_CREDENTIALS", e.getMessage());
+    }
+
+    @ExceptionHandler(ForbiddenException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleForbidden(ForbiddenException e) {
+        return new ErrorResponse("FORBIDDEN", e.getMessage());
+    }
+
+    @ExceptionHandler(BusinessRuleException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ErrorResponse handleBusinessRule(BusinessRuleException e) {
+        return new ErrorResponse(e.getCode(), e.getMessage());
     }
 
     @ExceptionHandler(IncorrectPasswordException.class)

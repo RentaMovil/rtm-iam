@@ -1,5 +1,6 @@
 package com.rentamovil.iam.infrastructure.persistence.adapter;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -39,5 +40,10 @@ public class UserRepositoryAdapter implements UserRepositoryPort {
     @Override
     public Optional<User> findByEmail(String email) {
         return userJpaRepository.findByPersonEmail(email).map(PersistenceMapper::toDomain);
+    }
+
+    @Override
+    public List<User> search(String search) {
+        return userJpaRepository.search(search).stream().map(PersistenceMapper::toDomain).toList();
     }
 }
