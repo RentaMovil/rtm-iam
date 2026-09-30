@@ -5,7 +5,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import com.rentamovil.iam.application.service.AuthTokenService;
+import com.rentamovil.iam.application.usecase.ChangeMyEmailUseCaseImpl;
+import com.rentamovil.iam.application.usecase.GetMyProfileUseCaseImpl;
 import com.rentamovil.iam.application.usecase.LoginUseCaseImpl;
+import com.rentamovil.iam.application.usecase.UpdateMyProfileUseCaseImpl;
+import com.rentamovil.iam.domain.port.in.ChangeMyEmailUseCase;
+import com.rentamovil.iam.domain.port.in.GetMyProfileUseCase;
+import com.rentamovil.iam.domain.port.in.UpdateMyProfileUseCase;
 import com.rentamovil.iam.application.usecase.LogoutUseCaseImpl;
 import com.rentamovil.iam.application.usecase.RefreshTokenUseCaseImpl;
 import com.rentamovil.iam.application.usecase.RegisterUserUseCaseImpl;
@@ -57,6 +63,24 @@ public class BeanConfig {
                                                    TokenProviderPort tokenProviderPort,
                                                    AuthTokenService authTokenService) {
         return new RefreshTokenUseCaseImpl(sessionRepositoryPort, userRepositoryPort, tokenProviderPort, authTokenService);
+    }
+
+    @Bean
+    public GetMyProfileUseCase getMyProfileUseCase(UserRepositoryPort userRepositoryPort) {
+        return new GetMyProfileUseCaseImpl(userRepositoryPort);
+    }
+
+    @Bean
+    public UpdateMyProfileUseCase updateMyProfileUseCase(UserRepositoryPort userRepositoryPort,
+                                                         PersonRepositoryPort personRepositoryPort) {
+        return new UpdateMyProfileUseCaseImpl(userRepositoryPort, personRepositoryPort);
+    }
+
+    @Bean
+    public ChangeMyEmailUseCase changeMyEmailUseCase(UserRepositoryPort userRepositoryPort,
+                                                     PersonRepositoryPort personRepositoryPort,
+                                                     PasswordHasherPort passwordHasherPort) {
+        return new ChangeMyEmailUseCaseImpl(userRepositoryPort, personRepositoryPort, passwordHasherPort);
     }
 
     @Bean

@@ -79,6 +79,12 @@ curl http://localhost:3001/health
 | POST | `/login` | — | HU-IAM-002 | 200 (tokens) · 401 `INVALID_CREDENTIALS` · 423 `ACCOUNT_BLOCKED` |
 | POST | `/refresh` | — | — | 200 (tokens nuevos) · 401 `INVALID_TOKEN` |
 | POST | `/logout` | Bearer | — | 204 · 401 `INVALID_TOKEN` |
+| GET | `/users/me` | Bearer | HU-IAM-004 | 200 (perfil) · 401 |
+| PATCH | `/users/me` | Bearer | HU-IAM-004 | 200 · 400 — cambia `firstName`, `lastName`, `phone` (lo que no venga no se toca) |
+| PATCH | `/users/me/email` | Bearer | HU-IAM-004 | 200 · 401 `INCORRECT_PASSWORD` · 409 `EMAIL_ALREADY_EXISTS` |
+
+Los endpoints con Bearer reciben al usuario con `@CurrentUser AuthenticatedUser` (ver
+`infrastructure/web/auth`): el id sale del token, nunca de la URL.
 
 Refresh: cada refresh token sirve **una sola vez** (rotación). Si llega uno ya usado, se revocan
 todas las sesiones del usuario (posible robo). Logout: `{"refreshToken": "...", "allDevices": false}`;
