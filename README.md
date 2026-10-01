@@ -69,6 +69,23 @@ curl http://localhost:3001/health
 
 `/health` responde `503` con `"db":"disconnected"` si la base deja de responder.
 
+### Con Docker
+
+Primero `rtm-iam-db` (`docker compose up -d`, crea la red `rentamovil`, SQL Server y migraciones).
+Después, en este repo:
+
+```bash
+docker compose up -d --build
+```
+
+- Contenedor `rentamovil-iam`, puerto 3001, alias `iam` en la red (el gateway lo llama
+  `http://iam:3001`).
+- Usa el mismo `.env`; solo cambia `DATABASE_URL` para apuntar al contenedor `sqlserver` en vez
+  de `localhost` (está en `docker-compose.yml`).
+- La primera construcción tarda (descarga dependencias dentro de Docker); las siguientes usan la
+  caché de Maven del `Dockerfile` y son rápidas.
+- No correr a la vez `mvn spring-boot:run` y el contenedor: los dos usan el puerto 3001.
+
 ## Endpoints
 
 | Método | Ruta | Auth | Historia | Respuestas |
