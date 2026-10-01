@@ -4,7 +4,10 @@ import java.util.List;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.ErrorResponseException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -113,11 +116,32 @@ public class GlobalExceptionHandler {
         return new ErrorResponse("CONFLICT", "El dato entra en conflicto con uno existente");
     }
 
+    // Errores propios de Spring que ya traen su código HTTP: método no permitido (405),
+    // ruta inexistente (404), Content-Type no soportado (415)... Se respeta ese código en vez de 500.
+    @ExceptionHandler(ErrorResponseException.class)
+    public ResponseEntity<ErrorResponse> handleSpringWebError(ErrorResponseException e) {
+        return springWebError(e.getStatusCode());
+    }
+
     // El detalle solo va al log, nunca en la respuesta
     @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ErrorResponse handleUnexpected(Exception e) {
+    public ResponseEntity<ErrorResponse> handleUnexpected(Exception e) {
+        //HttpRequestMethodNotSupportedException y similares implementan la interfaz ErrorResponse de Spring
+        if (e instanceof org.springframework.web.ErrorResponse springError) {
+            return springWebError(springError.getStatusCode());
+        }
         log.error("Error no controlado", e);
-        return new ErrorResponse("INTERNAL_ERROR", "Ocurrió un error inesperado");
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(new ErrorResponse("INTERNAL_ERROR", "Ocurrió un error inesperado"));
+    }
+
+    private ResponseEntity<ErrorResponse> springWebError(HttpStatusCode status) {
+        String code = switch (status.value()) {
+            case 404 -> "NOT_FOUND";
+            case 405 -> "METHOD_NOT_ALLOWED";
+            case 415 -> "UNSUPPORTED_MEDIA_TYPE";
+            default -> "REQUEST_ERROR";
+        };
+        return ResponseEntity.status(status).body(new ErrorResponse(code, "La petición no es válida para esta ruta"));
     }
 }
