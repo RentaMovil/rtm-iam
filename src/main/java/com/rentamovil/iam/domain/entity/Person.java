@@ -18,4 +18,6 @@ public class Person {
     private String lastName;
     private String email;
     private String phone;
+    // Foto de perfil: solo el enlace (la imagen vive en Cloudinary)
+    private String imageUrl;
 }

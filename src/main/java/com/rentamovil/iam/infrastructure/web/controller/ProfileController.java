@@ -38,7 +38,8 @@ public class ProfileController {
     public ProfileResponse updateProfile(@CurrentUser AuthenticatedUser currentUser,
                                          @Valid @RequestBody UpdateProfileRequest request) {
         return ProfileResponse.from(updateMyProfileUseCase.updateProfile(
-                currentUser.getUserId(), request.getFirstName(), request.getLastName(), request.getPhone()));
+                currentUser.getUserId(), request.getFirstName(), request.getLastName(), request.getPhone(),
+                request.getImageUrl()));
     }
 
     @PatchMapping("/email")

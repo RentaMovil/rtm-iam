@@ -19,6 +19,7 @@ public class UserResponse {
     private String username;
     private String firstName;
     private String lastName;
+    private String imageUrl;
     private String role;
     private String status;
     private List<String> permissions;
@@ -30,6 +31,7 @@ public class UserResponse {
                 .username(user.getUsername())
                 .firstName(user.getPerson().getFirstName())
                 .lastName(user.getPerson().getLastName())
+                .imageUrl(user.getPerson().getImageUrl())
                 .role(user.getRole().getName())
                 .status(user.getStatus().name())
                 .permissions(user.getRole().getPermissions())

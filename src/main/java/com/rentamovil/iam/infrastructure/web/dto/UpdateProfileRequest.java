@@ -22,4 +22,8 @@ public class UpdateProfileRequest {
     @Size(max = 20)
     @Pattern(regexp = "^[0-9+ ]*$", message = "solo números, espacios y +")
     private String phone;
+
+    // Vacío = quitar la foto. Que sea de nuestra cuenta de Cloudinary lo revisa el caso de uso.
+    @Size(max = 500)
+    private String imageUrl;
 }

@@ -45,6 +45,7 @@ public class AuthController {
                 .firstName(request.getFirstName().trim())
                 .lastName(request.getLastName().trim())
                 .email(request.getEmail())
+                .phone(request.getPhone() == null || request.getPhone().isBlank() ? null : request.getPhone().trim())
                 .build();
 
         User user = registerUserUseCase.register(person, request.getUsername(), request.getPassword());

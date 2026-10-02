@@ -5,7 +5,7 @@ import com.rentamovil.iam.domain.entity.User;
 import lombok.Builder;
 import lombok.Getter;
 
-// UserProfile de iam.yaml: los datos del usuario más el teléfono
+// UserProfile de iam.yaml: los datos del usuario más el teléfono y la foto
 @Getter
 @Builder
 public class ProfileResponse {
@@ -16,6 +16,7 @@ public class ProfileResponse {
     private String firstName;
     private String lastName;
     private String phone;
+    private String imageUrl;
     private String role;
     private String status;
 
@@ -27,6 +28,7 @@ public class ProfileResponse {
                 .firstName(user.getPerson().getFirstName())
                 .lastName(user.getPerson().getLastName())
                 .phone(user.getPerson().getPhone())
+                .imageUrl(user.getPerson().getImageUrl())
                 .role(user.getRole().getName())
                 .status(user.getStatus().name())
                 .build();
