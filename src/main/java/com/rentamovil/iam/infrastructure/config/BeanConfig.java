@@ -85,8 +85,9 @@ public class BeanConfig {
 
     @Bean
     public UpdateMyProfileUseCase updateMyProfileUseCase(UserRepositoryPort userRepositoryPort,
-                                                         PersonRepositoryPort personRepositoryPort) {
-        return new UpdateMyProfileUseCaseImpl(userRepositoryPort, personRepositoryPort);
+                                                         PersonRepositoryPort personRepositoryPort,
+                                                         @Value("${app.iam.profile-image.allowed-prefix}") String allowedImageUrlPrefix) {
+        return new UpdateMyProfileUseCaseImpl(userRepositoryPort, personRepositoryPort, allowedImageUrlPrefix);
     }
 
     @Bean

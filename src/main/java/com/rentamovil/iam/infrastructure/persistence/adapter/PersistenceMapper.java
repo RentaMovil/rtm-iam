@@ -26,6 +26,7 @@ public final class PersistenceMapper {
                 .lastName(entity.getLastName())
                 .email(entity.getEmail())
                 .phone(entity.getPhone())
+                .imageUrl(entity.getImageUrl())
                 .build();
     }
 
@@ -36,6 +37,7 @@ public final class PersistenceMapper {
         entity.setLastName(person.getLastName());
         entity.setEmail(person.getEmail());
         entity.setPhone(person.getPhone());
+        entity.setImageUrl(person.getImageUrl());
         return entity;
     }
 
