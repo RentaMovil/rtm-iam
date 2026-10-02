@@ -17,6 +17,7 @@ import com.rentamovil.iam.domain.exception.AccountBlockedException;
 import com.rentamovil.iam.domain.exception.BusinessRuleException;
 import com.rentamovil.iam.domain.exception.ForbiddenException;
 import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
+import com.rentamovil.iam.domain.exception.InvalidImageUrlException;
 import com.rentamovil.iam.domain.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.exception.InvalidVerificationCodeException;
 import com.rentamovil.iam.domain.exception.IncorrectPasswordException;
@@ -62,6 +63,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleInvalidCode(InvalidVerificationCodeException e) {
         return new ErrorResponse(e.getCode(), e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidImageUrlException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErrorResponse handleInvalidImageUrl(InvalidImageUrlException e) {
+        return new ErrorResponse("INVALID_IMAGE_URL", e.getMessage());
     }
 
     @ExceptionHandler(ForbiddenException.class)

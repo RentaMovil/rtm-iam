@@ -30,6 +30,11 @@ public class RegisterRequest {
     @Pattern(regexp = "^[a-zA-Z0-9._]+$", message = "solo letras, números, punto y guion bajo")
     private String username;
 
+    // Opcional: si no viene o viene vacío, la persona queda sin teléfono
+    @Size(max = 20)
+    @Pattern(regexp = "^[0-9+ ]*$", message = "solo números, espacios y +")
+    private String phone;
+
     // Mínimo 8 caracteres, al menos una mayúscula y un número
     @NotBlank
     @Size(min = 8, max = 100)
