@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Configuration;
 
 import com.rentamovil.iam.application.service.AuthTokenService;
 import com.rentamovil.iam.application.usecase.ChangeMyEmailUseCaseImpl;
+import com.rentamovil.iam.application.usecase.ChangeMyPasswordUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ChangeUserRoleUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ChangeUserStatusUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ListUsersUseCaseImpl;
@@ -23,6 +24,7 @@ import com.rentamovil.iam.application.usecase.GetMyProfileUseCaseImpl;
 import com.rentamovil.iam.application.usecase.LoginUseCaseImpl;
 import com.rentamovil.iam.application.usecase.UpdateMyProfileUseCaseImpl;
 import com.rentamovil.iam.domain.port.in.ChangeMyEmailUseCase;
+import com.rentamovil.iam.domain.port.in.ChangeMyPasswordUseCase;
 import com.rentamovil.iam.domain.port.in.GetMyProfileUseCase;
 import com.rentamovil.iam.domain.port.in.UpdateMyProfileUseCase;
 import com.rentamovil.iam.application.usecase.LogoutUseCaseImpl;
@@ -95,6 +97,14 @@ public class BeanConfig {
                                                      PersonRepositoryPort personRepositoryPort,
                                                      PasswordHasherPort passwordHasherPort) {
         return new ChangeMyEmailUseCaseImpl(userRepositoryPort, personRepositoryPort, passwordHasherPort);
+    }
+
+    @Bean
+    public ChangeMyPasswordUseCase changeMyPasswordUseCase(UserRepositoryPort userRepositoryPort,
+                                                           PasswordHasherPort passwordHasherPort,
+                                                           SessionRepositoryPort sessionRepositoryPort,
+                                                           AuditPort auditPort) {
+        return new ChangeMyPasswordUseCaseImpl(userRepositoryPort, passwordHasherPort, sessionRepositoryPort, auditPort);
     }
 
     @Bean
