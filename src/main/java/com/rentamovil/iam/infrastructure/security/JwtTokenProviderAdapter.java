@@ -52,6 +52,11 @@ public class JwtTokenProviderAdapter implements TokenProviderPort {
                 // Un solo rol, nunca una lista
                 .claim("role", user.getRole().getName())
                 .claim("permissions", user.getRole().getPermissions())
+                // El person_id va como NÚMERO, no como texto a propósito: los servicios que
+                // consumen este token lo leen con getIntegerClaim("personId"), que falla si el
+                // valor del JSON es una cadena. El "sub" sí es texto porque el estándar JWT lo
+                // obliga y cada servicio lo parsea con Integer.valueOf().
+                .claim("personId", user.getPerson().getId())
                 .issueTime(Date.from(now))
                 .expirationTime(Date.from(now.plusSeconds(accessTokenExpirySeconds)))
                 .jwtID(UUID.randomUUID().toString())
