@@ -15,6 +15,10 @@ import lombok.Getter;
 public class UserResponse {
 
     private Integer id;
+    // iam.person.person_id: reservation.client_id (booking) y otras FKs cruzadas apuntan aquí,
+    // no a user_id — sin este campo, un servicio que solo tiene el person_id no puede cruzarlo
+    // contra esta lista (quedaba indexada por user_id, un espacio de ids distinto).
+    private Integer personId;
     private String email;
     private String username;
     private String firstName;
@@ -27,6 +31,7 @@ public class UserResponse {
     public static UserResponse from(User user) {
         return UserResponse.builder()
                 .id(user.getId())
+                .personId(user.getPerson().getId())
                 .email(user.getPerson().getEmail())
                 .username(user.getUsername())
                 .firstName(user.getPerson().getFirstName())
