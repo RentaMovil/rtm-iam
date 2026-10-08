@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 // Nunca usar así en producción (el log quedaría con códigos válidos). Cuando haya SMTP se crea
 // otro adaptador (ej. SmtpEmailSenderAdapter con spring-boot-starter-mail) y se quita este.
 @Slf4j
-@Component
+// @Component  // Deshabilitado: usar SmtpEmailSenderAdapter para envío real de emails
 public class LogEmailSenderAdapter implements EmailSenderPort {
 
     @Override
