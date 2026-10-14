@@ -89,7 +89,7 @@ public class SmtpEmailSenderAdapter implements EmailSenderPort {
                 "        <table role='presentation' style='width: 600px; border-collapse: collapse; background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);'>" +
                 "          <!-- Header -->" +
                 "          <tr>" +
-                "            <td style='padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 8px 8px 0 0;'>" +
+                "            <td style='padding: 40px 40px 20px; text-align: center; background: linear-gradient(135deg, #667eea 0%, #b3b930 100%); border-radius: 8px 8px 0 0;'>" +
                 "              <h1 style='margin: 0; color: #ffffff; font-size: 28px;'>RentaMovil</h1>" +
                 "            </td>" +
                 "          </tr>" +
