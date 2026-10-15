@@ -12,8 +12,10 @@ import com.rentamovil.iam.application.usecase.ChangeUserStatusUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ListUsersUseCaseImpl;
 import com.rentamovil.iam.application.usecase.RequestPasswordRecoveryUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ResetPasswordUseCaseImpl;
+import com.rentamovil.iam.application.usecase.VerifyPasswordCodeUseCaseImpl;
 import com.rentamovil.iam.domain.port.in.RequestPasswordRecoveryUseCase;
 import com.rentamovil.iam.domain.port.in.ResetPasswordUseCase;
+import com.rentamovil.iam.domain.port.in.VerifyPasswordCodeUseCase;
 import com.rentamovil.iam.domain.port.out.EmailSenderPort;
 import com.rentamovil.iam.domain.port.out.VerificationCodeRepositoryPort;
 import com.rentamovil.iam.domain.port.in.ChangeUserRoleUseCase;
@@ -133,6 +135,12 @@ public class BeanConfig {
             @Value("${app.iam.password-reset.code-expiry}") long codeExpirySeconds) {
         return new RequestPasswordRecoveryUseCaseImpl(userRepositoryPort, verificationCodeRepositoryPort,
                 emailSenderPort, codeExpirySeconds);
+    }
+
+    @Bean
+    public VerifyPasswordCodeUseCase verifyPasswordCodeUseCase(UserRepositoryPort userRepositoryPort,
+                                                               VerificationCodeRepositoryPort verificationCodeRepositoryPort) {
+        return new VerifyPasswordCodeUseCaseImpl(userRepositoryPort, verificationCodeRepositoryPort);
     }
 
     @Bean
