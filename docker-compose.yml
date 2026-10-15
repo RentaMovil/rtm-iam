@@ -1,0 +1,22 @@
+# IAM en su propio contenedor. Antes hay que levantar rtm-iam-db (SQL Server + migraciones),
+# que comparte la red "rentamovil".
+services:
+  iam:
+    build: .
+    container_name: rentamovil-iam
+    # Toma las variables del .env (contraseña de iam_app, claves JWT...)
+    env_file: .env
+    environment:
+      # Dentro de Docker la base no está en "localhost", sino en el contenedor "sqlserver"
+      DATABASE_URL: jdbc:sqlserver://sqlserver:1433;databaseName=rentamovil;encrypt=true;trustServerCertificate=true
+    ports:
+      - "${APP_IAM_PORT:-3001}:3001"
+    networks:
+      rentamovil:
+        # El gateway la encuentra con este nombre: http://iam:3001
+        aliases: [iam]
+    restart: unless-stopped
+
+networks:
+  rentamovil:
+    external: true
