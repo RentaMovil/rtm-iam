@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import com.rentamovil.iam.domain.exception.AccountBlockedException;
 import com.rentamovil.iam.domain.exception.BusinessRuleException;
+import com.rentamovil.iam.domain.exception.EmailNotVerifiedException;
 import com.rentamovil.iam.domain.exception.ForbiddenException;
 import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
 import com.rentamovil.iam.domain.exception.InvalidImageUrlException;
@@ -105,6 +106,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.LOCKED)
     public ErrorResponse handleAccountBlocked(AccountBlockedException e) {
         return new ErrorResponse("ACCOUNT_BLOCKED", e.getMessage());
+    }
+
+    @ExceptionHandler(EmailNotVerifiedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorResponse handleEmailNotVerified(EmailNotVerifiedException e) {
+        return new ErrorResponse("EMAIL_NOT_VERIFIED", e.getMessage());
     }
 
     // Dos registros iguales al mismo tiempo: los dos pasan el "existe?" pero la base frena al segundo
