@@ -18,4 +18,10 @@ public class LogEmailSenderAdapter implements EmailSenderPort {
         log.warn("[EMAIL DE DESARROLLO] Para: {} | Hola {}, tu código para recuperar la contraseña es {} (vence en 15 minutos)",
                 email, firstName, code);
     }
+
+    @Override
+    public void sendEmailVerificationCode(String email, String firstName, String code) {
+        log.warn("[EMAIL DE DESARROLLO] Para: {} | Hola {}, tu código para verificar tu cuenta es {} (vence en 15 minutos)",
+                email, firstName, code);
+    }
 }
