@@ -3,6 +3,7 @@ package com.rentamovil.iam.application.usecase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -12,7 +13,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -21,10 +21,12 @@ import com.rentamovil.iam.domain.entity.Role;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.enums.UserStatus;
 import com.rentamovil.iam.domain.exception.ResourceAlreadyExistsException;
+import com.rentamovil.iam.domain.port.out.EmailSenderPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
 import com.rentamovil.iam.domain.port.out.PersonRepositoryPort;
 import com.rentamovil.iam.domain.port.out.RoleRepositoryPort;
 import com.rentamovil.iam.domain.port.out.UserRepositoryPort;
+import com.rentamovil.iam.domain.port.out.VerificationCodeRepositoryPort;
 
 @ExtendWith(MockitoExtension.class)
 class RegisterUserUseCaseImplTest {
@@ -37,19 +39,25 @@ class RegisterUserUseCaseImplTest {
     private RoleRepositoryPort roleRepositoryPort;
     @Mock
     private PasswordHasherPort passwordHasherPort;
+    @Mock
+    private VerificationCodeRepositoryPort verificationCodeRepositoryPort;
+    @Mock
+    private EmailSenderPort emailSenderPort;
 
-    @InjectMocks
+    // @InjectMocks no sirve acá: el último parámetro (codeExpirySeconds) es un long, no un mock.
     private RegisterUserUseCaseImpl registerUserUseCase;
 
     private Person person;
 
     @BeforeEach
     void setUp() {
+        registerUserUseCase = new RegisterUserUseCaseImpl(personRepositoryPort, userRepositoryPort,
+                roleRepositoryPort, passwordHasherPort, verificationCodeRepositoryPort, emailSenderPort, 900L);
         person = Person.builder().firstName("María").lastName("García").email("Maria.Garcia@Example.com").build();
     }
 
     @Test
-    void registraUnClienteActivoConLaContrasenaEncriptada() {
+    void registraUnClientePendienteDeVerificacionYMandaElCodigo() {
         when(personRepositoryPort.existsByEmail("maria.garcia@example.com")).thenReturn(false);
         when(userRepositoryPort.existsByUsername("mgarcia")).thenReturn(false);
         when(roleRepositoryPort.findByName(Role.CLIENT)).thenReturn(Optional.of(Role.builder().id(1).name(Role.CLIENT).build()));
@@ -60,9 +68,12 @@ class RegisterUserUseCaseImplTest {
         User user = registerUserUseCase.register(person, "mgarcia", "SecurePass123!");
 
         assertThat(user.getRole().getName()).isEqualTo(Role.CLIENT);
-        assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
+        assertThat(user.getStatus()).isEqualTo(UserStatus.PENDING_VERIFICATION);
         assertThat(user.getPasswordHash()).isEqualTo("$2a$12$hash");
         assertThat(user.getPerson().getEmail()).isEqualTo("maria.garcia@example.com");
+
+        verify(verificationCodeRepositoryPort).save(any());
+        verify(emailSenderPort).sendEmailVerificationCode(eq("maria.garcia@example.com"), eq("María"), any());
     }
 
     @Test
