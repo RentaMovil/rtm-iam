@@ -21,6 +21,7 @@ import com.rentamovil.iam.infrastructure.web.dto.LoginRequest;
 import com.rentamovil.iam.infrastructure.web.dto.LogoutRequest;
 import com.rentamovil.iam.infrastructure.web.dto.RefreshRequest;
 import com.rentamovil.iam.infrastructure.web.dto.RegisterRequest;
+import com.rentamovil.iam.infrastructure.web.dto.RegisterResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -36,11 +37,11 @@ public class AuthController {
     private final LogoutUseCase logoutUseCase;
 
     // HU-IAM-001: registro público, siempre crea un CLIENT.
-    // Al registrarse queda con la sesión iniciada: se crea la cuenta y enseguida se hace el login,
-    // así se reutiliza todo (permisos, JWT, sesión) sin repetir código.
+    // Queda PENDING_VERIFICATION: no se emite sesión todavía, primero tiene que confirmar el
+    // código que se le manda al correo (POST /auth/email/verify, ese sí la deja logueada).
     @PostMapping("/register")
     @ResponseStatus(HttpStatus.CREATED)
-    public AuthResponse register(@Valid @RequestBody RegisterRequest request, HttpServletRequest httpRequest) {
+    public RegisterResponse register(@Valid @RequestBody RegisterRequest request) {
         Person person = Person.builder()
                 .firstName(request.getFirstName().trim())
                 .lastName(request.getLastName().trim())
@@ -50,12 +51,10 @@ public class AuthController {
 
         User user = registerUserUseCase.register(person, request.getUsername(), request.getPassword());
 
-        AuthTokens tokens = loginUseCase.login(
-                user.getUsername(),
-                request.getPassword(),
-                httpRequest.getRemoteAddr(),
-                userAgent(httpRequest));
-        return AuthResponse.from(tokens);
+        return RegisterResponse.builder()
+                .email(user.getPerson().getEmail())
+                .message("Revisa tu correo para verificar tu cuenta")
+                .build();
     }
 
     // HU-IAM-002: login con email o username

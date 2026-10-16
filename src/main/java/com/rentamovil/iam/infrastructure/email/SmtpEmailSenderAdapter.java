@@ -44,23 +44,36 @@ public class SmtpEmailSenderAdapter implements EmailSenderPort {
 
     @Override
     public void sendPasswordResetCode(String toEmail, String firstName, String code) {
+        send(toEmail, "Código de recuperación de contraseña - RentaMovil",
+                buildEmailBody(firstName, code, "Recibimos una solicitud para restablecer la contraseña de tu cuenta en RentaMovil."),
+                "recuperación");
+    }
+
+    @Override
+    public void sendEmailVerificationCode(String toEmail, String firstName, String code) {
+        send(toEmail, "Verifica tu cuenta - RentaMovil",
+                buildEmailBody(firstName, code, "Gracias por registrarte en RentaMovil. Para activar tu cuenta, confirma tu correo."),
+                "verificación de cuenta");
+    }
+
+    private void send(String toEmail, String subject, String htmlBody, String logLabel) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(fromEmail, fromName);
             helper.setTo(toEmail);
-            helper.setSubject("Código de recuperación de contraseña - RentaMovil");
-            helper.setText(buildEmailBody(firstName, code), true); // true = HTML
+            helper.setSubject(subject);
+            helper.setText(htmlBody, true); // true = HTML
 
             mailSender.send(message);
-            
-            log.info("Email de recuperación enviado exitosamente a: {}", toEmail);
-            
+
+            log.info("Email de {} enviado exitosamente a: {}", logLabel, toEmail);
+
         } catch (MessagingException e) {
-            log.error("Error al enviar email de recuperación a {}: {}", toEmail, e.getMessage(), e);
+            log.error("Error al enviar email de {} a {}: {}", logLabel, toEmail, e.getMessage(), e);
             // En producción podrías lanzar una excepción custom o implementar retry logic
-            throw new RuntimeException("Error al enviar email de recuperación", e);
+            throw new RuntimeException("Error al enviar email de " + logLabel, e);
         } catch (Exception e) {
             log.error("Error inesperado al enviar email a {}: {}", toEmail, e.getMessage(), e);
             throw new RuntimeException("Error inesperado al enviar email", e);
@@ -68,19 +81,20 @@ public class SmtpEmailSenderAdapter implements EmailSenderPort {
     }
 
     /**
-     * Construye el cuerpo HTML del email de recuperación de contraseña.
-     * 
+     * Construye el cuerpo HTML del email (recuperación de contraseña o verificación de cuenta).
+     *
      * @param firstName Nombre del usuario
      * @param code Código de verificación de 6 dígitos
+     * @param introText Texto que explica para qué es el código, según el caso
      * @return HTML del email
      */
-    private String buildEmailBody(String firstName, String code) {
+    private String buildEmailBody(String firstName, String code, String introText) {
         return "<!DOCTYPE html>" +
                 "<html lang='es'>" +
                 "<head>" +
                 "  <meta charset='UTF-8'>" +
                 "  <meta name='viewport' content='width=device-width, initial-scale=1.0'>" +
-                "  <title>Recuperación de Contraseña</title>" +
+                "  <title>RentaMovil</title>" +
                 "</head>" +
                 "<body style='margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;'>" +
                 "  <table role='presentation' style='width: 100%; border-collapse: collapse;'>" +
@@ -98,7 +112,7 @@ public class SmtpEmailSenderAdapter implements EmailSenderPort {
                 "            <td style='padding: 40px;'>" +
                 "              <h2 style='margin: 0 0 20px; color: #333333; font-size: 24px;'>Hola " + escapeHtml(firstName) + ",</h2>" +
                 "              <p style='margin: 0 0 20px; color: #666666; font-size: 16px; line-height: 1.6;'>" +
-                "                Recibimos una solicitud para restablecer la contraseña de tu cuenta en RentaMovil." +
+                introText +
                 "              </p>" +
                 "              <p style='margin: 0 0 30px; color: #666666; font-size: 16px; line-height: 1.6;'>" +
                 "                Tu código de verificación es:" +
