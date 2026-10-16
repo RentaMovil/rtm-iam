@@ -5,4 +5,6 @@ package com.rentamovil.iam.domain.port.out;
 public interface EmailSenderPort {
 
     void sendPasswordResetCode(String email, String firstName, String code);
+
+    void sendEmailVerificationCode(String email, String firstName, String code);
 }

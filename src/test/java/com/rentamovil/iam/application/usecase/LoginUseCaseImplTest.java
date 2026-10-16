@@ -23,6 +23,7 @@ import com.rentamovil.iam.domain.entity.Role;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.enums.UserStatus;
 import com.rentamovil.iam.domain.exception.AccountBlockedException;
+import com.rentamovil.iam.domain.exception.EmailNotVerifiedException;
 import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
 import com.rentamovil.iam.domain.port.out.LoginAttemptPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
@@ -111,5 +112,16 @@ class LoginUseCaseImplTest {
         assertThatThrownBy(() -> loginUseCase.login("mgarcia", "SecurePass123!", null, null))
                 .isInstanceOf(AccountBlockedException.class);
         verify(passwordHasherPort, never()).matches(any(), any());
+    }
+
+    @Test
+    void cuentaPendienteDeVerificacionConContrasenaCorrectaDaEmailNotVerified() {
+        user.setStatus(UserStatus.PENDING_VERIFICATION);
+        when(userRepositoryPort.findByUsername("mgarcia")).thenReturn(Optional.of(user));
+        when(passwordHasherPort.matches("SecurePass123!", "$2a$12$hash")).thenReturn(true);
+
+        assertThatThrownBy(() -> loginUseCase.login("mgarcia", "SecurePass123!", null, null))
+                .isInstanceOf(EmailNotVerifiedException.class);
+        verify(authTokenService, never()).issue(any(), any(), any());
     }
 }
