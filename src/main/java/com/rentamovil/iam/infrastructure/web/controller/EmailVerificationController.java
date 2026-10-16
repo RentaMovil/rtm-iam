@@ -21,8 +21,10 @@ import lombok.RequiredArgsConstructor;
 
 // HU-IAM-001: confirmar el correo con el código que llega al registrarse. Endpoints públicos,
 // igual que /password/*: nadie tiene sesión todavía en este punto.
+// El api-gateway enruta /auth/** hacia iam quitando el prefijo "/auth" (StripPrefix=1), igual
+// que con /password/** -> PasswordController: por eso el mapping de acá es solo "/email".
 @RestController
-@RequestMapping("/auth/email")
+@RequestMapping("/email")
 @RequiredArgsConstructor
 public class EmailVerificationController {
 
