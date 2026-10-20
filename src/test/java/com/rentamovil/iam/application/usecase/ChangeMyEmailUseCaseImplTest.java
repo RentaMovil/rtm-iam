@@ -50,7 +50,7 @@ class ChangeMyEmailUseCaseImplTest {
     }
 
     @Test
-    void cambiaElEmailSiLaContrasenaEsCorrecta() {
+    void changesTheEmailWhenThePasswordIsCorrect() {
         when(passwordHasherPort.matches("SecurePass123!", "$2a$12$hash")).thenReturn(true);
         when(personRepositoryPort.existsByEmail("nuevo@example.com")).thenReturn(false);
         when(personRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -61,21 +61,21 @@ class ChangeMyEmailUseCaseImplTest {
     }
 
     @Test
-    void contrasenaIncorrectaNoCambiaElEmail() {
-        when(passwordHasherPort.matches("mala", "$2a$12$hash")).thenReturn(false);
+    void incorrectPasswordDoesNotChangeTheEmail() {
+        when(passwordHasherPort.matches("wrong", "$2a$12$hash")).thenReturn(false);
 
-        assertThatThrownBy(() -> changeMyEmailUseCase.changeEmail(1, "nuevo@example.com", "mala"))
+        assertThatThrownBy(() -> changeMyEmailUseCase.changeEmail(1, "nuevo@example.com", "wrong"))
                 .isInstanceOf(IncorrectPasswordException.class);
         assertThat(user.getPerson().getEmail()).isEqualTo("maria@example.com");
         verify(personRepositoryPort, never()).save(any());
     }
 
     @Test
-    void emailDeOtraPersonaDa409() {
+    void emailFromAnotherPersonReturns409() {
         when(passwordHasherPort.matches("SecurePass123!", "$2a$12$hash")).thenReturn(true);
-        when(personRepositoryPort.existsByEmail("otro@example.com")).thenReturn(true);
+        when(personRepositoryPort.existsByEmail("other@example.com")).thenReturn(true);
 
-        assertThatThrownBy(() -> changeMyEmailUseCase.changeEmail(1, "otro@example.com", "SecurePass123!"))
+        assertThatThrownBy(() -> changeMyEmailUseCase.changeEmail(1, "other@example.com", "SecurePass123!"))
                 .isInstanceOf(ResourceAlreadyExistsException.class);
         verify(personRepositoryPort, never()).save(any());
     }

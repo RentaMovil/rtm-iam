@@ -40,13 +40,13 @@ class UpdateMyProfileUseCaseImplTest {
         user = User.builder()
                 .id(1)
                 .person(Person.builder().id(1).firstName("María").lastName("García").phone("300")
-                        .imageUrl(CLOUDINARY + "vieja.jpg").build())
+                        .imageUrl(CLOUDINARY + "old.jpg").build())
                 .build();
         when(userRepositoryPort.findById(1)).thenReturn(Optional.of(user));
     }
 
     @Test
-    void soloCambiaLosCamposQueVienen() {
+    void onlyChangesTheFieldsThatAreSent() {
         when(personRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         User result = updateMyProfileUseCase.updateProfile(1, null, null, "3001234567", null);
@@ -54,20 +54,20 @@ class UpdateMyProfileUseCaseImplTest {
         assertThat(result.getPerson().getPhone()).isEqualTo("3001234567");
         assertThat(result.getPerson().getFirstName()).isEqualTo("María");
         assertThat(result.getPerson().getLastName()).isEqualTo("García");
-        assertThat(result.getPerson().getImageUrl()).isEqualTo(CLOUDINARY + "vieja.jpg");
+        assertThat(result.getPerson().getImageUrl()).isEqualTo(CLOUDINARY + "old.jpg");
     }
 
     @Test
-    void cambiaLaFotoSiEsDeNuestraCuentaDeCloudinary() {
+    void changesThePhotoWhenItsFromOurCloudinaryAccount() {
         when(personRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        User result = updateMyProfileUseCase.updateProfile(1, null, null, null, CLOUDINARY + "v1/nueva.jpg");
+        User result = updateMyProfileUseCase.updateProfile(1, null, null, null, CLOUDINARY + "v1/new.jpg");
 
-        assertThat(result.getPerson().getImageUrl()).isEqualTo(CLOUDINARY + "v1/nueva.jpg");
+        assertThat(result.getPerson().getImageUrl()).isEqualTo(CLOUDINARY + "v1/new.jpg");
     }
 
     @Test
-    void fotoVaciaLaQuita() {
+    void anEmptyPhotoRemovesIt() {
         when(personRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         User result = updateMyProfileUseCase.updateProfile(1, null, null, null, "");
@@ -76,8 +76,8 @@ class UpdateMyProfileUseCaseImplTest {
     }
 
     @Test
-    void rechazaFotosDeOtrosSitios() {
-        assertThatThrownBy(() -> updateMyProfileUseCase.updateProfile(1, null, null, null, "https://otro-sitio.com/foto.jpg"))
+    void rejectsPhotosFromOtherSites() {
+        assertThatThrownBy(() -> updateMyProfileUseCase.updateProfile(1, null, null, null, "https://another-site.com/photo.jpg"))
                 .isInstanceOf(InvalidImageUrlException.class);
 
         verify(personRepositoryPort, never()).save(any());

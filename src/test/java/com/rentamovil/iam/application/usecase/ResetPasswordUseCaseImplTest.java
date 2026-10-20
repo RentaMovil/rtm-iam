@@ -50,7 +50,7 @@ class ResetPasswordUseCaseImplTest {
 
     @BeforeEach
     void setUp() {
-        user = User.builder().id(1).person(Person.builder().email("maria@example.com").build()).passwordHash("vieja").build();
+        user = User.builder().id(1).person(Person.builder().email("maria@example.com").build()).passwordHash("old").build();
         code = VerificationCode.builder().id(7).userId(1).code("123456").type(CodeType.PASSWORD_RESET)
                 .expiresAt(LocalDateTime.now().plusMinutes(10)).used(false).build();
         when(userRepositoryPort.findByEmail("maria@example.com")).thenReturn(Optional.of(user));
@@ -58,30 +58,30 @@ class ResetPasswordUseCaseImplTest {
     }
 
     @Test
-    void codigoCorrectoCambiaLaContrasenaYCierraLasSesiones() {
-        when(passwordHasherPort.hash("NuevaPass123")).thenReturn("nueva-hash");
+    void correctCodeChangesThePasswordAndClosesTheSessions() {
+        when(passwordHasherPort.hash("NewPass123")).thenReturn("new-hash");
 
-        resetPasswordUseCase.resetPassword("Maria@Example.com", "123456", "NuevaPass123");
+        resetPasswordUseCase.resetPassword("Maria@Example.com", "123456", "NewPass123");
 
-        assertThat(user.getPasswordHash()).isEqualTo("nueva-hash");
+        assertThat(user.getPasswordHash()).isEqualTo("new-hash");
         assertThat(code.isUsed()).isTrue();
         verify(sessionRepositoryPort).revokeAllByUserId(1);
     }
 
     @Test
-    void codigoIncorrectoNoCambiaNada() {
-        assertThatThrownBy(() -> resetPasswordUseCase.resetPassword("maria@example.com", "000000", "NuevaPass123"))
+    void incorrectCodeChangesNothing() {
+        assertThatThrownBy(() -> resetPasswordUseCase.resetPassword("maria@example.com", "000000", "NewPass123"))
                 .isInstanceOf(InvalidVerificationCodeException.class)
                 .extracting("code").isEqualTo("INVALID_CODE");
-        assertThat(user.getPasswordHash()).isEqualTo("vieja");
+        assertThat(user.getPasswordHash()).isEqualTo("old");
         verify(userRepositoryPort, never()).save(any());
     }
 
     @Test
-    void codigoVencidoDaCodeExpired() {
+    void expiredCodeGivesCodeExpired() {
         code.setExpiresAt(LocalDateTime.now().minusMinutes(1));
 
-        assertThatThrownBy(() -> resetPasswordUseCase.resetPassword("maria@example.com", "123456", "NuevaPass123"))
+        assertThatThrownBy(() -> resetPasswordUseCase.resetPassword("maria@example.com", "123456", "NewPass123"))
                 .isInstanceOf(InvalidVerificationCodeException.class)
                 .extracting("code").isEqualTo("CODE_EXPIRED");
         verify(userRepositoryPort, never()).save(any());

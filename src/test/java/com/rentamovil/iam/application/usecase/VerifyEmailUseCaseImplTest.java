@@ -55,7 +55,7 @@ class VerifyEmailUseCaseImplTest {
     }
 
     @Test
-    void codigoCorrectoActivaLaCuentaYDevuelveTokens() {
+    void correctCodeActivatesTheAccountAndReturnsTokens() {
         when(verificationCodeRepositoryPort.findLatestUnused(1, CodeType.EMAIL_VERIFICATION)).thenReturn(Optional.of(code));
         when(userRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
         AuthTokens tokens = AuthTokens.builder().accessToken("token").build();
@@ -69,7 +69,7 @@ class VerifyEmailUseCaseImplTest {
     }
 
     @Test
-    void cuentaYaVerificadaDaCodigoInvalido() {
+    void alreadyVerifiedAccountGivesInvalidCode() {
         user.setStatus(UserStatus.ACTIVE);
 
         assertThatThrownBy(() -> verifyEmailUseCase.verifyEmail("maria@example.com", "123456", "127.0.0.1", "chrome"))
@@ -79,7 +79,7 @@ class VerifyEmailUseCaseImplTest {
     }
 
     @Test
-    void codigoIncorrectoNoActivaNada() {
+    void incorrectCodeActivatesNothing() {
         when(verificationCodeRepositoryPort.findLatestUnused(1, CodeType.EMAIL_VERIFICATION)).thenReturn(Optional.of(code));
 
         assertThatThrownBy(() -> verifyEmailUseCase.verifyEmail("maria@example.com", "000000", "127.0.0.1", "chrome"))
@@ -90,7 +90,7 @@ class VerifyEmailUseCaseImplTest {
     }
 
     @Test
-    void codigoVencidoDaCodeExpired() {
+    void expiredCodeGivesCodeExpired() {
         code.setExpiresAt(LocalDateTime.now().minusMinutes(1));
         when(verificationCodeRepositoryPort.findLatestUnused(1, CodeType.EMAIL_VERIFICATION)).thenReturn(Optional.of(code));
 

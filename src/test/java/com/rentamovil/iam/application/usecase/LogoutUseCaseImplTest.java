@@ -29,7 +29,7 @@ class LogoutUseCaseImplTest {
     private LogoutUseCaseImpl logoutUseCase;
 
     @Test
-    void cierraLaSesionDelRefreshTokenEnviado() {
+    void closesTheSessionOfTheGivenRefreshToken() {
         when(tokenProviderPort.hashRefreshToken("token")).thenReturn("hash");
         when(sessionRepositoryPort.findByRefreshTokenHash("hash"))
                 .thenReturn(Optional.of(Session.builder().id(10).userId(1).build()));
@@ -40,7 +40,7 @@ class LogoutUseCaseImplTest {
     }
 
     @Test
-    void noCierraLaSesionDeOtroUsuario() {
+    void doesNotCloseAnotherUsersSession() {
         when(tokenProviderPort.hashRefreshToken("token")).thenReturn("hash");
         when(sessionRepositoryPort.findByRefreshTokenHash("hash"))
                 .thenReturn(Optional.of(Session.builder().id(10).userId(2).build()));
@@ -51,7 +51,7 @@ class LogoutUseCaseImplTest {
     }
 
     @Test
-    void conAllDevicesCierraTodasLasSesiones() {
+    void withAllDevicesClosesEverySession() {
         logoutUseCase.logout(1, null, true);
 
         verify(sessionRepositoryPort).revokeAllByUserId(1);

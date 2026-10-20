@@ -44,7 +44,7 @@ class RegisterUserUseCaseImplTest {
     @Mock
     private EmailSenderPort emailSenderPort;
 
-    // @InjectMocks no sirve acá: el último parámetro (codeExpirySeconds) es un long, no un mock.
+    // @InjectMocks doesn't work here: the last parameter (codeExpirySeconds) is a long, not a mock.
     private RegisterUserUseCaseImpl registerUserUseCase;
 
     private Person person;
@@ -57,7 +57,7 @@ class RegisterUserUseCaseImplTest {
     }
 
     @Test
-    void registraUnClientePendienteDeVerificacionYMandaElCodigo() {
+    void registersAClientPendingVerificationAndSendsTheCode() {
         when(personRepositoryPort.existsByEmail("maria.garcia@example.com")).thenReturn(false);
         when(userRepositoryPort.existsByUsername("mgarcia")).thenReturn(false);
         when(roleRepositoryPort.findByName(Role.CLIENT)).thenReturn(Optional.of(Role.builder().id(1).name(Role.CLIENT).build()));
@@ -77,7 +77,7 @@ class RegisterUserUseCaseImplTest {
     }
 
     @Test
-    void rechazaUnEmailYaRegistrado() {
+    void rejectsAnAlreadyRegisteredEmail() {
         when(personRepositoryPort.existsByEmail("maria.garcia@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> registerUserUseCase.register(person, "mgarcia", "SecurePass123!"))
@@ -87,7 +87,7 @@ class RegisterUserUseCaseImplTest {
     }
 
     @Test
-    void rechazaUnUsernameEnUso() {
+    void rejectsAUsernameInUse() {
         when(personRepositoryPort.existsByEmail("maria.garcia@example.com")).thenReturn(false);
         when(userRepositoryPort.existsByUsername("mgarcia")).thenReturn(true);
 
