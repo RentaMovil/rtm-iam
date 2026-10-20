@@ -45,29 +45,29 @@ class ChangeMyPasswordUseCaseImplTest {
 
     @BeforeEach
     void setUp() {
-        user = User.builder().id(1).passwordHash("hash-viejo").build();
+        user = User.builder().id(1).passwordHash("old-hash").build();
         when(userRepositoryPort.findById(1)).thenReturn(Optional.of(user));
     }
 
     @Test
-    void cambiaLaContrasenaYCierraTodasLasSesiones() {
-        when(passwordHasherPort.matches("Actual123", "hash-viejo")).thenReturn(true);
-        when(passwordHasherPort.matches("Nueva1234", "hash-viejo")).thenReturn(false);
-        when(passwordHasherPort.hash("Nueva1234")).thenReturn("hash-nuevo");
+    void changesThePasswordAndClosesAllSessions() {
+        when(passwordHasherPort.matches("Current123", "old-hash")).thenReturn(true);
+        when(passwordHasherPort.matches("New1234", "old-hash")).thenReturn(false);
+        when(passwordHasherPort.hash("New1234")).thenReturn("new-hash");
 
-        changeMyPasswordUseCase.changePassword(1, "Actual123", "Nueva1234");
+        changeMyPasswordUseCase.changePassword(1, "Current123", "New1234");
 
-        assertThat(user.getPasswordHash()).isEqualTo("hash-nuevo");
+        assertThat(user.getPasswordHash()).isEqualTo("new-hash");
         verify(userRepositoryPort).save(user);
         verify(sessionRepositoryPort).revokeAllByUserId(1);
         verify(auditPort).record(eq(1), eq("PASSWORD_CHANGED"), eq("user"), eq(1), anyMap());
     }
 
     @Test
-    void rechazaSiLaContrasenaActualEsIncorrecta() {
-        when(passwordHasherPort.matches("Mala123", "hash-viejo")).thenReturn(false);
+    void rejectsWhenTheCurrentPasswordIsIncorrect() {
+        when(passwordHasherPort.matches("Wrong123", "old-hash")).thenReturn(false);
 
-        assertThatThrownBy(() -> changeMyPasswordUseCase.changePassword(1, "Mala123", "Nueva1234"))
+        assertThatThrownBy(() -> changeMyPasswordUseCase.changePassword(1, "Wrong123", "New1234"))
                 .isInstanceOf(IncorrectPasswordException.class);
 
         verify(userRepositoryPort, never()).save(any());
@@ -75,10 +75,10 @@ class ChangeMyPasswordUseCaseImplTest {
     }
 
     @Test
-    void rechazaSiLaNuevaEsIgualALaActual() {
-        when(passwordHasherPort.matches("Actual123", "hash-viejo")).thenReturn(true);
+    void rejectsWhenTheNewPasswordEqualsTheCurrent() {
+        when(passwordHasherPort.matches("Current123", "old-hash")).thenReturn(true);
 
-        assertThatThrownBy(() -> changeMyPasswordUseCase.changePassword(1, "Actual123", "Actual123"))
+        assertThatThrownBy(() -> changeMyPasswordUseCase.changePassword(1, "Current123", "Current123"))
                 .isInstanceOf(BusinessRuleException.class);
 
         verify(userRepositoryPort, never()).save(any());

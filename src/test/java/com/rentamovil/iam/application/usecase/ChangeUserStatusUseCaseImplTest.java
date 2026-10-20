@@ -41,7 +41,7 @@ class ChangeUserStatusUseCaseImplTest {
     private ChangeUserStatusUseCaseImpl changeUserStatusUseCase;
 
     @Test
-    void desbloqueaUnaCuentaBloqueada() {
+    void unblocksABlockedAccount() {
         User blocked = User.builder().id(5).status(UserStatus.BLOCKED).build();
         when(userRepositoryPort.findById(5)).thenReturn(Optional.of(blocked));
         when(userRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
@@ -53,7 +53,7 @@ class ChangeUserStatusUseCaseImplTest {
     }
 
     @Test
-    void noSePuedeDesactivarUnaCuentaBloqueada() {
+    void aBlockedAccountCannotBeDeactivated() {
         when(userRepositoryPort.findById(5)).thenReturn(Optional.of(User.builder().id(5).status(UserStatus.BLOCKED).build()));
 
         assertThatThrownBy(() -> changeUserStatusUseCase.changeStatus(SUPER_ADMIN, 5, UserStatus.INACTIVE))
@@ -62,7 +62,7 @@ class ChangeUserStatusUseCaseImplTest {
     }
 
     @Test
-    void unClienteNoPuedeCambiarEstados() {
+    void aClientCannotChangeStatuses() {
         AuthenticatedUser client = new AuthenticatedUser(3, Role.CLIENT, List.of("vehicles:read"));
 
         assertThatThrownBy(() -> changeUserStatusUseCase.changeStatus(client, 5, UserStatus.ACTIVE))

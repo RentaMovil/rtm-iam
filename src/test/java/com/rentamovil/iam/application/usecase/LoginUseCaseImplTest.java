@@ -59,7 +59,7 @@ class LoginUseCaseImplTest {
     }
 
     @Test
-    void loginCorrectoConEmailDevuelveLosTokens() {
+    void successfulLoginWithEmailReturnsTheTokens() {
         AuthTokens tokens = AuthTokens.builder().accessToken("jwt").refreshToken("refresh").build();
         when(userRepositoryPort.findByEmail("maria@example.com")).thenReturn(Optional.of(user));
         when(passwordHasherPort.matches("SecurePass123!", "$2a$12$hash")).thenReturn(true);
@@ -73,39 +73,39 @@ class LoginUseCaseImplTest {
     }
 
     @Test
-    void usuarioInexistenteDa401() {
-        when(userRepositoryPort.findByUsername("noexiste")).thenReturn(Optional.empty());
+    void nonexistentUserReturns401() {
+        when(userRepositoryPort.findByUsername("doesnotexist")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> loginUseCase.login("noexiste", "SecurePass123!", null, null))
+        assertThatThrownBy(() -> loginUseCase.login("doesnotexist", "SecurePass123!", null, null))
                 .isInstanceOf(InvalidCredentialsException.class);
     }
 
     @Test
-    void contrasenaIncorrectaDa401YCuentaElIntento() {
+    void incorrectPasswordReturns401AndCountsTheAttempt() {
         when(userRepositoryPort.findByUsername("mgarcia")).thenReturn(Optional.of(user));
-        when(passwordHasherPort.matches("mala", "$2a$12$hash")).thenReturn(false);
+        when(passwordHasherPort.matches("wrong", "$2a$12$hash")).thenReturn(false);
         when(loginAttemptPort.registerFailure(1)).thenReturn(1);
 
-        assertThatThrownBy(() -> loginUseCase.login("mgarcia", "mala", null, null))
+        assertThatThrownBy(() -> loginUseCase.login("mgarcia", "wrong", null, null))
                 .isInstanceOf(InvalidCredentialsException.class);
         assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
         verify(authTokenService, never()).issue(any(), any(), any());
     }
 
     @Test
-    void alQuintoFalloLaCuentaQuedaBloqueada() {
+    void theFifthFailureBlocksTheAccount() {
         when(userRepositoryPort.findByUsername("mgarcia")).thenReturn(Optional.of(user));
-        when(passwordHasherPort.matches("mala", "$2a$12$hash")).thenReturn(false);
+        when(passwordHasherPort.matches("wrong", "$2a$12$hash")).thenReturn(false);
         when(loginAttemptPort.registerFailure(1)).thenReturn(5);
 
-        assertThatThrownBy(() -> loginUseCase.login("mgarcia", "mala", null, null))
+        assertThatThrownBy(() -> loginUseCase.login("mgarcia", "wrong", null, null))
                 .isInstanceOf(InvalidCredentialsException.class);
         assertThat(user.getStatus()).isEqualTo(UserStatus.BLOCKED);
         verify(userRepositoryPort).save(user);
     }
 
     @Test
-    void cuentaBloqueadaDa423AunqueLaContrasenaSeaCorrecta() {
+    void blockedAccountReturns423EvenWithTheCorrectPassword() {
         user.setStatus(UserStatus.BLOCKED);
         when(userRepositoryPort.findByUsername("mgarcia")).thenReturn(Optional.of(user));
 
@@ -115,7 +115,7 @@ class LoginUseCaseImplTest {
     }
 
     @Test
-    void cuentaPendienteDeVerificacionConContrasenaCorrectaDaEmailNotVerified() {
+    void accountPendingVerificationWithCorrectPasswordGivesEmailNotVerified() {
         user.setStatus(UserStatus.PENDING_VERIFICATION);
         when(userRepositoryPort.findByUsername("mgarcia")).thenReturn(Optional.of(user));
         when(passwordHasherPort.matches("SecurePass123!", "$2a$12$hash")).thenReturn(true);

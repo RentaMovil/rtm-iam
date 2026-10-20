@@ -57,21 +57,21 @@ class RefreshTokenUseCaseImplTest {
     }
 
     @Test
-    void refreshCorrectoRevocaLaSesionAnteriorYEntregaTokensNuevos() {
+    void successfulRefreshRevokesThePreviousSessionAndIssuesNewTokens() {
         User user = User.builder().id(1).status(UserStatus.ACTIVE).build();
         when(sessionRepositoryPort.findByRefreshTokenHash("hash")).thenReturn(Optional.of(session));
         when(sessionRepositoryPort.revokeIfActive(10)).thenReturn(true);
         when(userRepositoryPort.findById(1)).thenReturn(Optional.of(user));
-        when(authTokenService.issue(user, null, null)).thenReturn(AuthTokens.builder().refreshToken("nuevo").build());
+        when(authTokenService.issue(user, null, null)).thenReturn(AuthTokens.builder().refreshToken("new").build());
 
         AuthTokens tokens = refreshTokenUseCase.refresh("token", null, null);
 
-        assertThat(tokens.getRefreshToken()).isEqualTo("nuevo");
+        assertThat(tokens.getRefreshToken()).isEqualTo("new");
         verify(sessionRepositoryPort).revokeIfActive(10);
     }
 
     @Test
-    void tokenDesconocidoDa401() {
+    void unknownTokenReturns401() {
         when(sessionRepositoryPort.findByRefreshTokenHash("hash")).thenReturn(Optional.empty());
 
         assertThatThrownBy(() -> refreshTokenUseCase.refresh("token", null, null))
@@ -79,7 +79,7 @@ class RefreshTokenUseCaseImplTest {
     }
 
     @Test
-    void tokenYaUsadoCierraTodasLasSesionesDelUsuario() {
+    void alreadyUsedTokenClosesEveryUsersSession() {
         session.setRevoked(true);
         when(sessionRepositoryPort.findByRefreshTokenHash("hash")).thenReturn(Optional.of(session));
 
@@ -90,7 +90,7 @@ class RefreshTokenUseCaseImplTest {
     }
 
     @Test
-    void tokenVencidoDa401() {
+    void expiredTokenReturns401() {
         session.setExpiresAt(LocalDateTime.now().minusMinutes(1));
         when(sessionRepositoryPort.findByRefreshTokenHash("hash")).thenReturn(Optional.of(session));
         when(sessionRepositoryPort.revokeIfActive(10)).thenReturn(true);

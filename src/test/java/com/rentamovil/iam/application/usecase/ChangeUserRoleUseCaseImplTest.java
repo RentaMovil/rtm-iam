@@ -47,7 +47,7 @@ class ChangeUserRoleUseCaseImplTest {
     private ChangeUserRoleUseCaseImpl changeUserRoleUseCase;
 
     @Test
-    void superAdminPuedeDarleRolAdminAUnCliente() {
+    void superAdminCanGrantAdminRoleToAClient() {
         User client = User.builder().id(5).role(Role.builder().id(1).name(Role.CLIENT).build()).build();
         when(userRepositoryPort.findById(5)).thenReturn(Optional.of(client));
         when(roleRepositoryPort.findByName(Role.ADMIN)).thenReturn(Optional.of(Role.builder().id(2).name(Role.ADMIN).build()));
@@ -60,14 +60,14 @@ class ChangeUserRoleUseCaseImplTest {
     }
 
     @Test
-    void unAdminNoPuedeCambiarRoles() {
+    void anAdminCannotChangeRoles() {
         assertThatThrownBy(() -> changeUserRoleUseCase.changeRole(ADMIN, 5, Role.ADMIN))
                 .isInstanceOf(ForbiddenException.class);
         verify(userRepositoryPort, never()).save(any());
     }
 
     @Test
-    void nadieSeCambiaSuPropioRol() {
+    void noOneCanChangeTheirOwnRole() {
         assertThatThrownBy(() -> changeUserRoleUseCase.changeRole(SUPER_ADMIN, 1, Role.CLIENT))
                 .isInstanceOf(BusinessRuleException.class);
         verify(auditPort, never()).record(anyInt(), anyString(), anyString(), eq(1), anyMap());
