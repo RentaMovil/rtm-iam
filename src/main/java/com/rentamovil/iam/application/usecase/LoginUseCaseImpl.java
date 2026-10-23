@@ -8,6 +8,7 @@ import com.rentamovil.iam.domain.entity.AuthTokens;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.enums.UserStatus;
 import com.rentamovil.iam.domain.exception.AccountBlockedException;
+import com.rentamovil.iam.domain.exception.EmailNotVerifiedException;
 import com.rentamovil.iam.domain.exception.InvalidCredentialsException;
 import com.rentamovil.iam.domain.port.in.LoginUseCase;
 import com.rentamovil.iam.domain.port.out.LoginAttemptPort;
@@ -43,6 +44,12 @@ public class LoginUseCaseImpl implements LoginUseCase {
         if (!passwordHasherPort.matches(rawPassword, user.getPasswordHash())) {
             registerFailedAttempt(user);
             throw new InvalidCredentialsException();
+        }
+
+        //Con la contraseña correcta ya sabemos que es dueño de la cuenta: avisarle que falta
+        //verificar el correo no es filtrar nada que no supiera
+        if (user.getStatus() == UserStatus.PENDING_VERIFICATION) {
+            throw new EmailNotVerifiedException();
         }
 
         //Una cuenta desactivada por un SUPER_ADMIN tampoco puede entrar

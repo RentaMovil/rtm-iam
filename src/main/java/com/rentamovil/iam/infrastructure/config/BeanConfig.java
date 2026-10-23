@@ -11,10 +11,14 @@ import com.rentamovil.iam.application.usecase.ChangeUserRoleUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ChangeUserStatusUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ListUsersUseCaseImpl;
 import com.rentamovil.iam.application.usecase.RequestPasswordRecoveryUseCaseImpl;
+import com.rentamovil.iam.application.usecase.ResendEmailVerificationUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ResetPasswordUseCaseImpl;
+import com.rentamovil.iam.application.usecase.VerifyEmailUseCaseImpl;
 import com.rentamovil.iam.application.usecase.VerifyPasswordCodeUseCaseImpl;
 import com.rentamovil.iam.domain.port.in.RequestPasswordRecoveryUseCase;
+import com.rentamovil.iam.domain.port.in.ResendEmailVerificationUseCase;
 import com.rentamovil.iam.domain.port.in.ResetPasswordUseCase;
+import com.rentamovil.iam.domain.port.in.VerifyEmailUseCase;
 import com.rentamovil.iam.domain.port.in.VerifyPasswordCodeUseCase;
 import com.rentamovil.iam.domain.port.out.EmailSenderPort;
 import com.rentamovil.iam.domain.port.out.VerificationCodeRepositoryPort;
@@ -62,8 +66,12 @@ public class BeanConfig {
     public RegisterUserUseCase registerUserUseCase(PersonRepositoryPort personRepositoryPort,
                                                    UserRepositoryPort userRepositoryPort,
                                                    RoleRepositoryPort roleRepositoryPort,
-                                                   PasswordHasherPort passwordHasherPort) {
-        return new RegisterUserUseCaseImpl(personRepositoryPort, userRepositoryPort, roleRepositoryPort, passwordHasherPort);
+                                                   PasswordHasherPort passwordHasherPort,
+                                                   VerificationCodeRepositoryPort verificationCodeRepositoryPort,
+                                                   EmailSenderPort emailSenderPort,
+                                                   @Value("${app.iam.email-verification.code-expiry}") long codeExpirySeconds) {
+        return new RegisterUserUseCaseImpl(personRepositoryPort, userRepositoryPort, roleRepositoryPort,
+                passwordHasherPort, verificationCodeRepositoryPort, emailSenderPort, codeExpirySeconds);
     }
 
     @Bean
@@ -157,5 +165,22 @@ public class BeanConfig {
     public LogoutUseCase logoutUseCase(SessionRepositoryPort sessionRepositoryPort,
                                        TokenProviderPort tokenProviderPort) {
         return new LogoutUseCaseImpl(sessionRepositoryPort, tokenProviderPort);
+    }
+
+    @Bean
+    public VerifyEmailUseCase verifyEmailUseCase(UserRepositoryPort userRepositoryPort,
+                                                 VerificationCodeRepositoryPort verificationCodeRepositoryPort,
+                                                 AuthTokenService authTokenService) {
+        return new VerifyEmailUseCaseImpl(userRepositoryPort, verificationCodeRepositoryPort, authTokenService);
+    }
+
+    @Bean
+    public ResendEmailVerificationUseCase resendEmailVerificationUseCase(
+            UserRepositoryPort userRepositoryPort,
+            VerificationCodeRepositoryPort verificationCodeRepositoryPort,
+            EmailSenderPort emailSenderPort,
+            @Value("${app.iam.email-verification.code-expiry}") long codeExpirySeconds) {
+        return new ResendEmailVerificationUseCaseImpl(userRepositoryPort, verificationCodeRepositoryPort,
+                emailSenderPort, codeExpirySeconds);
     }
 }
