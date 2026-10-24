@@ -11,10 +11,14 @@ import com.rentamovil.iam.application.usecase.ChangeUserRoleUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ChangeUserStatusUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ListUsersUseCaseImpl;
 import com.rentamovil.iam.application.usecase.RequestPasswordRecoveryUseCaseImpl;
+import com.rentamovil.iam.application.usecase.RegisterPushTokenUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ResendEmailVerificationUseCaseImpl;
 import com.rentamovil.iam.application.usecase.ResetPasswordUseCaseImpl;
 import com.rentamovil.iam.application.usecase.VerifyEmailUseCaseImpl;
 import com.rentamovil.iam.application.usecase.VerifyPasswordCodeUseCaseImpl;
+import com.rentamovil.iam.application.usecase.GetPushTokensUseCaseImpl;
+import com.rentamovil.iam.domain.port.in.GetPushTokensUseCase;
+import com.rentamovil.iam.domain.port.in.RegisterPushTokenUseCase;
 import com.rentamovil.iam.domain.port.in.RequestPasswordRecoveryUseCase;
 import com.rentamovil.iam.domain.port.in.ResendEmailVerificationUseCase;
 import com.rentamovil.iam.domain.port.in.ResetPasswordUseCase;
@@ -44,6 +48,7 @@ import com.rentamovil.iam.domain.port.out.LoginAttemptPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
 import com.rentamovil.iam.domain.port.out.PermissionRepositoryPort;
 import com.rentamovil.iam.domain.port.out.PersonRepositoryPort;
+import com.rentamovil.iam.domain.port.out.PushDeviceTokenRepositoryPort;
 import com.rentamovil.iam.domain.port.out.RoleRepositoryPort;
 import com.rentamovil.iam.domain.port.out.SessionRepositoryPort;
 import com.rentamovil.iam.domain.port.out.TokenProviderPort;
@@ -172,6 +177,16 @@ public class BeanConfig {
                                                  VerificationCodeRepositoryPort verificationCodeRepositoryPort,
                                                  AuthTokenService authTokenService) {
         return new VerifyEmailUseCaseImpl(userRepositoryPort, verificationCodeRepositoryPort, authTokenService);
+    }
+
+    @Bean
+    public RegisterPushTokenUseCase registerPushTokenUseCase(PushDeviceTokenRepositoryPort pushDeviceTokenRepositoryPort) {
+        return new RegisterPushTokenUseCaseImpl(pushDeviceTokenRepositoryPort);
+    }
+
+    @Bean
+    public GetPushTokensUseCase getPushTokensUseCase(PushDeviceTokenRepositoryPort pushDeviceTokenRepositoryPort) {
+        return new GetPushTokensUseCaseImpl(pushDeviceTokenRepositoryPort);
     }
 
     @Bean
