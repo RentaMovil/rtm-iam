@@ -6,7 +6,7 @@ import com.rentamovil.iam.application.service.AuthTokenService;
 import com.rentamovil.iam.domain.entity.AuthTokens;
 import com.rentamovil.iam.domain.entity.Session;
 import com.rentamovil.iam.domain.entity.User;
-import com.rentamovil.iam.domain.exception.InvalidTokenException;
+import com.rentamovil.common.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.port.in.RefreshTokenUseCase;
 import com.rentamovil.iam.domain.port.out.SessionRepositoryPort;
 import com.rentamovil.iam.domain.port.out.TokenProviderPort;

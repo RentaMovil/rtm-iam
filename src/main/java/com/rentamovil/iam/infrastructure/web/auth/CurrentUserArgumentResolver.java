@@ -9,7 +9,7 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 
 import com.rentamovil.iam.domain.entity.AuthenticatedUser;
-import com.rentamovil.iam.domain.exception.InvalidTokenException;
+import com.rentamovil.common.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.port.out.TokenProviderPort;
 
 import lombok.RequiredArgsConstructor;

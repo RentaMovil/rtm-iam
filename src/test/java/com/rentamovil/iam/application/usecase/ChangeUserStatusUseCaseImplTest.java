@@ -21,8 +21,8 @@ import com.rentamovil.iam.domain.entity.AuthenticatedUser;
 import com.rentamovil.iam.domain.entity.Role;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.enums.UserStatus;
-import com.rentamovil.iam.domain.exception.BusinessRuleException;
-import com.rentamovil.iam.domain.exception.ForbiddenException;
+import com.rentamovil.common.exception.BusinessRuleException;
+import com.rentamovil.common.exception.ForbiddenException;
 import com.rentamovil.iam.domain.port.out.AuditPort;
 import com.rentamovil.iam.domain.port.out.UserRepositoryPort;
 

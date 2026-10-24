@@ -3,7 +3,7 @@ package com.rentamovil.iam.application.usecase;
 import com.rentamovil.iam.domain.entity.Person;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.exception.InvalidImageUrlException;
-import com.rentamovil.iam.domain.exception.ResourceNotFoundException;
+import com.rentamovil.common.exception.ResourceNotFoundException;
 import com.rentamovil.iam.domain.port.in.UpdateMyProfileUseCase;
 import com.rentamovil.iam.domain.port.out.PersonRepositoryPort;
 import com.rentamovil.iam.domain.port.out.UserRepositoryPort;

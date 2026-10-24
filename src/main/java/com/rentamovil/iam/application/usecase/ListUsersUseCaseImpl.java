@@ -4,7 +4,7 @@ import java.util.List;
 
 import com.rentamovil.iam.domain.entity.AuthenticatedUser;
 import com.rentamovil.iam.domain.entity.User;
-import com.rentamovil.iam.domain.exception.ForbiddenException;
+import com.rentamovil.common.exception.ForbiddenException;
 import com.rentamovil.iam.domain.port.in.ListUsersUseCase;
 import com.rentamovil.iam.domain.port.out.UserRepositoryPort;
 

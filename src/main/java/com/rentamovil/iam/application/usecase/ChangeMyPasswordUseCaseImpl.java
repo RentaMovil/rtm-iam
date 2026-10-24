@@ -5,9 +5,9 @@ import java.util.Map;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.rentamovil.iam.domain.entity.User;
-import com.rentamovil.iam.domain.exception.BusinessRuleException;
+import com.rentamovil.common.exception.BusinessRuleException;
 import com.rentamovil.iam.domain.exception.IncorrectPasswordException;
-import com.rentamovil.iam.domain.exception.ResourceNotFoundException;
+import com.rentamovil.common.exception.ResourceNotFoundException;
 import com.rentamovil.iam.domain.port.in.ChangeMyPasswordUseCase;
 import com.rentamovil.iam.domain.port.out.AuditPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;

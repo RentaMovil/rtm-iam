@@ -20,7 +20,7 @@ import com.rentamovil.iam.domain.entity.Person;
 import com.rentamovil.iam.domain.entity.Role;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.enums.UserStatus;
-import com.rentamovil.iam.domain.exception.ResourceAlreadyExistsException;
+import com.rentamovil.common.exception.ResourceAlreadyExistsException;
 import com.rentamovil.iam.domain.port.out.EmailSenderPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
 import com.rentamovil.iam.domain.port.out.PersonRepositoryPort;

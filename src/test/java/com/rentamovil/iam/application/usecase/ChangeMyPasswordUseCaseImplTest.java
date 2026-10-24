@@ -19,7 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.rentamovil.iam.domain.entity.User;
-import com.rentamovil.iam.domain.exception.BusinessRuleException;
+import com.rentamovil.common.exception.BusinessRuleException;
 import com.rentamovil.iam.domain.exception.IncorrectPasswordException;
 import com.rentamovil.iam.domain.port.out.AuditPort;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;

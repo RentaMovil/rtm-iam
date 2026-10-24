@@ -25,7 +25,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.rentamovil.iam.domain.entity.AuthenticatedUser;
 import com.rentamovil.iam.domain.entity.User;
-import com.rentamovil.iam.domain.exception.InvalidTokenException;
+import com.rentamovil.common.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.port.out.TokenProviderPort;
 
 // Crea los tokens. Claims definidos en 07-api/authentication.md: sub, email, role, permissions.

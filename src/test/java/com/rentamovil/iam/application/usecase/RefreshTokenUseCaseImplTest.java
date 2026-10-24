@@ -22,7 +22,7 @@ import com.rentamovil.iam.domain.entity.AuthTokens;
 import com.rentamovil.iam.domain.entity.Session;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.enums.UserStatus;
-import com.rentamovil.iam.domain.exception.InvalidTokenException;
+import com.rentamovil.common.exception.InvalidTokenException;
 import com.rentamovil.iam.domain.port.out.SessionRepositoryPort;
 import com.rentamovil.iam.domain.port.out.TokenProviderPort;
 import com.rentamovil.iam.domain.port.out.UserRepositoryPort;

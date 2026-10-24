@@ -2,8 +2,8 @@ package com.rentamovil.iam.application.usecase;
 
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.exception.IncorrectPasswordException;
-import com.rentamovil.iam.domain.exception.ResourceAlreadyExistsException;
-import com.rentamovil.iam.domain.exception.ResourceNotFoundException;
+import com.rentamovil.common.exception.ResourceAlreadyExistsException;
+import com.rentamovil.common.exception.ResourceNotFoundException;
 import com.rentamovil.iam.domain.port.in.ChangeMyEmailUseCase;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
 import com.rentamovil.iam.domain.port.out.PersonRepositoryPort;

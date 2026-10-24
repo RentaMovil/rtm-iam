@@ -19,7 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.rentamovil.iam.domain.entity.Person;
 import com.rentamovil.iam.domain.entity.User;
 import com.rentamovil.iam.domain.exception.IncorrectPasswordException;
-import com.rentamovil.iam.domain.exception.ResourceAlreadyExistsException;
+import com.rentamovil.common.exception.ResourceAlreadyExistsException;
 import com.rentamovil.iam.domain.port.out.PasswordHasherPort;
 import com.rentamovil.iam.domain.port.out.PersonRepositoryPort;
 import com.rentamovil.iam.domain.port.out.UserRepositoryPort;
