@@ -1,6 +1,7 @@
 package com.rentamovil.iam.infrastructure.persistence.adapter;
 
 import com.rentamovil.iam.domain.entity.Person;
+import com.rentamovil.iam.domain.entity.PushDeviceToken;
 import com.rentamovil.iam.domain.entity.Role;
 import com.rentamovil.iam.domain.entity.Session;
 import com.rentamovil.iam.domain.entity.User;
@@ -8,6 +9,7 @@ import com.rentamovil.iam.domain.entity.VerificationCode;
 import com.rentamovil.iam.domain.enums.CodeType;
 import com.rentamovil.iam.domain.enums.UserStatus;
 import com.rentamovil.iam.infrastructure.persistence.entity.PersonEntity;
+import com.rentamovil.iam.infrastructure.persistence.entity.PushDeviceTokenEntity;
 import com.rentamovil.iam.infrastructure.persistence.entity.RoleEntity;
 import com.rentamovil.iam.infrastructure.persistence.entity.SessionEntity;
 import com.rentamovil.iam.infrastructure.persistence.entity.UserEntity;
@@ -129,5 +131,15 @@ public final class PersistenceMapper {
         entity.setStatus(user.getStatus().name());
         entity.setLastLogin(user.getLastLogin());
         return entity;
+    }
+
+    public static PushDeviceToken toDomain(PushDeviceTokenEntity entity) {
+        return PushDeviceToken.builder()
+                .id(entity.getId())
+                .userId(entity.getUserId())
+                .token(entity.getToken())
+                .platform(entity.getPlatform())
+                .createdAt(entity.getCreatedAt())
+                .build();
     }
 }

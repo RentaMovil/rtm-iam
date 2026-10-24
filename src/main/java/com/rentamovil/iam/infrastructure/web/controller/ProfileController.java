@@ -3,6 +3,7 @@ package com.rentamovil.iam.infrastructure.web.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -12,11 +13,13 @@ import com.rentamovil.iam.domain.entity.AuthenticatedUser;
 import com.rentamovil.iam.domain.port.in.ChangeMyEmailUseCase;
 import com.rentamovil.iam.domain.port.in.ChangeMyPasswordUseCase;
 import com.rentamovil.iam.domain.port.in.GetMyProfileUseCase;
+import com.rentamovil.iam.domain.port.in.RegisterPushTokenUseCase;
 import com.rentamovil.iam.domain.port.in.UpdateMyProfileUseCase;
 import com.rentamovil.iam.infrastructure.web.auth.CurrentUser;
 import com.rentamovil.iam.infrastructure.web.dto.ChangeEmailRequest;
 import com.rentamovil.iam.infrastructure.web.dto.ChangePasswordRequest;
 import com.rentamovil.iam.infrastructure.web.dto.ProfileResponse;
+import com.rentamovil.iam.infrastructure.web.dto.RegisterPushTokenRequest;
 import com.rentamovil.iam.infrastructure.web.dto.UpdateProfileRequest;
 
 import jakarta.validation.Valid;
@@ -33,6 +36,7 @@ public class ProfileController {
     private final UpdateMyProfileUseCase updateMyProfileUseCase;
     private final ChangeMyEmailUseCase changeMyEmailUseCase;
     private final ChangeMyPasswordUseCase changeMyPasswordUseCase;
+    private final RegisterPushTokenUseCase registerPushTokenUseCase;
 
     @GetMapping
     public ProfileResponse getProfile(@CurrentUser AuthenticatedUser currentUser) {
@@ -61,5 +65,13 @@ public class ProfileController {
                                @Valid @RequestBody ChangePasswordRequest request) {
         changeMyPasswordUseCase.changePassword(
                 currentUser.getUserId(), request.getCurrentPassword(), request.getNewPassword());
+    }
+
+    // El móvil llama esto al loguearse, con el Expo Push Token de este dispositivo.
+    @PostMapping("/push-token")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void registerPushToken(@CurrentUser AuthenticatedUser currentUser,
+                                  @Valid @RequestBody RegisterPushTokenRequest request) {
+        registerPushTokenUseCase.registerToken(currentUser.getUserId(), request.getToken(), request.getPlatform());
     }
 }
