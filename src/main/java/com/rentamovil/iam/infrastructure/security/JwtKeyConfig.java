@@ -16,7 +16,8 @@ import com.nimbusds.jose.jwk.KeyUse;
 import com.nimbusds.jose.jwk.RSAKey;
 
 // Carga el par de claves RS256 del .env al arrancar.
-// La privada firma los tokens; la pública se publica en /jwks para que otros servicios los verifiquen.
+// La privada firma los tokens; la pública se copia a mano al .env de cada servicio consumidor
+// (APP_<SERVICIO>_JWT_PUBLIC_KEY) para que verifiquen la firma sin depender de un endpoint propio.
 @Configuration
 public class JwtKeyConfig {
 
